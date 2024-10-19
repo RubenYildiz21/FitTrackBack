@@ -24,7 +24,31 @@ public class Seance {
     // Relations : une séance peut contenir plusieurs blocs
     @OneToMany
     @JoinColumn(name = "idSeance")
-    private List<Bloc> blocs; // La liste de blocs dans une séance
+    private List<Bloc> blocs;
 
     // Getters and Setters
+
+    public Long getIdSeance() {
+        return idSeance;
+    }
+
+    public void setIdSeance(Long idSeance) {
+        this.idSeance = idSeance;
+    }
+
+    public Date getDateSeance() {
+        return dateSeance;
+    }
+
+    public void setDateSeance(Date dateSeance) {
+        this.dateSeance = dateSeance;
+    }
+
+    public List<Bloc> getBlocs() {
+        return blocs;
+    }
+
+    public void setBlocs(List<Bloc> blocs) {
+        this.blocs = blocs;
+    }
 }

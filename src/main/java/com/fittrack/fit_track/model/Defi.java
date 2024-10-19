@@ -21,12 +21,44 @@ public class Defi {
     
     @ManyToOne
     @JoinColumn(name = "idCreateur")
-    private User createur;  // Assurez-vous que la classe "Membre" existe
+    private User createur;
 
     // Relations
     @ManyToMany
     @JoinTable(name = "participer", joinColumns = @JoinColumn(name = "idDefi"), inverseJoinColumns = @JoinColumn(name = "idUser"))
-    private List<User> participants;  // Assurez-vous que "Membre" est la classe appropriée
+    private List<User> participants;
 
     // Getters and Setters
+
+    public Long getIdDefi() {
+        return idDefi;
+    }
+
+    public void setIdDefi(Long idDefi) {
+        this.idDefi = idDefi;
+    }
+
+    public String getObjectif() {
+        return objectif;
+    }
+
+    public void setObjectif(String objectif) {
+        this.objectif = objectif;
+    }
+
+    public User getCreateur() {
+        return createur;
+    }
+
+    public void setCreateur(User createur) {
+        this.createur = createur;
+    }
+
+    public List<User> getParticipants() {
+        return participants;
+    }
+
+    public void setParticipants(List<User> participants) {
+        this.participants = participants;
+    }
 }

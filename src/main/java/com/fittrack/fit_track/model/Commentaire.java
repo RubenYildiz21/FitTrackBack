@@ -13,23 +13,64 @@ import jakarta.persistence.TemporalType;
 
 @Entity
 public class Commentaire {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long idCommentaire;
     
+    private String message;
+    
     @Temporal(TemporalType.TIMESTAMP)
     private Date dateCommentaire = new Date();
     
-    private String message;
-    
     @ManyToOne
-    @JoinColumn(name = "idCommentaireParent")
-    private Commentaire parentCommentaire;
-
-    // Relations
-    @ManyToOne
-    @JoinColumn(name = "post_id")
+    @JoinColumn(name = "idPost")
     private Post post;
+    
+    // Ajout du champ user pour la relation avec User
+    @ManyToOne
+    @JoinColumn(name = "idUser")
+    private User user;  // Utilisateur qui a fait le commentaire
 
-    // Getters and Setters
+    // Getters et setters
+
+    public Long getIdCommentaire() {
+        return idCommentaire;
+    }
+
+    public void setIdCommentaire(Long idCommentaire) {
+        this.idCommentaire = idCommentaire;
+    }
+
+    public String getMessage() {
+        return message;
+    }
+
+    public void setMessage(String message) {
+        this.message = message;
+    }
+
+    public Date getDateCommentaire() {
+        return dateCommentaire;
+    }
+
+    public void setDateCommentaire(Date dateCommentaire) {
+        this.dateCommentaire = dateCommentaire;
+    }
+
+    public Post getPost() {
+        return post;
+    }
+
+    public void setPost(Post post) {
+        this.post = post;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
+    }
 }
