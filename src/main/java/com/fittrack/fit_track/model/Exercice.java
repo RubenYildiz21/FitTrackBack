@@ -24,4 +24,52 @@ public class Exercice {
     private List<Bloc> blocs;
 
     // Getters and Setters
+
+    public Long getIdExercice() {
+        return idExercice;
+    }
+
+    public void setIdExercice(Long idExercice) {
+        this.idExercice = idExercice;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public String getNom() {
+        return nom;
+    }
+
+    public void setNom(String nom) {
+        this.nom = nom;
+    }
+
+    public String getLienVideo() {
+        return lienVideo;
+    }
+
+    public void setLienVideo(String lienVideo) {
+        this.lienVideo = lienVideo;
+    }
+
+    public String getMateriel() {
+        return materiel;
+    }
+
+    public void setMateriel(String materiel) {
+        this.materiel = materiel;
+    }
+
+    public List<Bloc> getBlocs() {
+        return blocs;
+    }
+
+    public void setBlocs(List<Bloc> blocs) {
+        this.blocs = blocs;
+    }
 }
