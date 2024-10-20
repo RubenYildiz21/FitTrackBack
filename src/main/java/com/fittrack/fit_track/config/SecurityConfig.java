@@ -3,25 +3,21 @@ package com.fittrack.fit_track.config;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
-@EnableWebSecurity
 public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        // Autoriser Swagger UI sans authentification
-        http
-                .authorizeHttpRequests((requests) -> requests
-                                .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html").permitAll()
-                                .anyRequest().authenticated() // Authentification pour les autres endpoints
-                )
-                .formLogin(login -> login  // Formulaire de login
-                        .permitAll())
-                .logout(logout -> logout
-                        .permitAll());
+        // Disable CSRF and allow requests to all endpoints without authentication
+        http.csrf().disable()
+            .authorizeHttpRequests((requests) -> requests
+                .anyRequest().permitAll()
+            );
 
         return http.build();
     }
