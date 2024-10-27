@@ -28,7 +28,6 @@ public class AuthController {
     public String login(@RequestParam String email, @RequestParam String password) {
 
         Optional<User> userOptional = userRepository.findByEmail(email);
-        //TODO: process POST request
 
         if (userOptional.isPresent()){
             User user = userOptional.get();
