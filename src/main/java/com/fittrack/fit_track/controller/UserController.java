@@ -1,13 +1,13 @@
 package com.fittrack.fit_track.controller;
 
-import java.util.Optional;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -22,6 +22,10 @@ public class UserController {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
+
     // S'inscrire avec les informations personnelles
     @PostMapping("/register")
     public ResponseEntity<?> registerUser(@Validated @RequestBody User user) {
@@ -30,30 +34,18 @@ public class UserController {
             return ResponseEntity.badRequest().body("Email already in use");
         }
 
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
+
         // Sauvegarder l'utilisateur après validation des informations
         User savedUser = userRepository.save(user);
         return ResponseEntity.ok(savedUser);
     }
 
-    // Questions personnelles après inscription
-    @PutMapping("/register/questions/{id}")
-    public ResponseEntity<?> setPersonalQuestions(@PathVariable Long id, @RequestBody User userDetails) {
-        Optional<User> userOpt = userRepository.findById(id);
-
-        if (userOpt.isEmpty()) {
-            return ResponseEntity.badRequest().body("User not found");
-        }
-
-        User user = userOpt.get();
-
-        // Mettre à jour les réponses aux questions personnelles
-        user.setGender(userDetails.getGender());
-        user.setMainGoal(userDetails.getMainGoal());
-        user.setHeight(userDetails.getHeight());
-        user.setWeight(userDetails.getWeight());
-        user.setPlace(userDetails.getPlace());
-
-        User updatedUser = userRepository.save(user);
-        return ResponseEntity.ok(updatedUser);
+    // Récupérer la liste des utilisateurs
+    @GetMapping("/users")
+    public ResponseEntity<List<User>> getAllUsers() {
+        List<User> users = userRepository.findAll();
+        return ResponseEntity.ok(users);
     }
+
 }
