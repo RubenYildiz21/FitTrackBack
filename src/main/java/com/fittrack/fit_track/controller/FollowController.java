@@ -1,8 +1,8 @@
 package com.fittrack.fit_track.controller;
 
-import com.fittrack.fit_track.model.Connection;
+import com.fittrack.fit_track.model.Follow;
 import com.fittrack.fit_track.model.User;
-import com.fittrack.fit_track.repository.ConnectionRepository;
+import com.fittrack.fit_track.repository.FollowRepository;
 import com.fittrack.fit_track.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -11,27 +11,29 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/connection")
-public class ConnectionController {
+public class FollowController {
 
     @Autowired
-    private ConnectionRepository connectionRepository;
+    private FollowRepository followRepository;
 
     @Autowired
     private UserRepository userRepository;
 
     // Follow un user
     @PostMapping("/follow")
-    public ResponseEntity<?> followUser(@Validated @RequestBody Connection connection) {
+    public ResponseEntity<?> followUser(@Validated @RequestBody Follow follow) {
         // Vérifier si l'utilisateur à suivre existe
-        User userToFollow = userRepository.findById(connection.getFollow().getIdUser()).orElse(null);
-        User currentUser = userRepository.findById(connection.getFollower().getIdUser()).orElse(null);
+        User userToFollow = userRepository.findById(follow.getFollow().getIdUser()).orElse(null);
+        User currentUser = userRepository.findById(follow.getFollower().getIdUser()).orElse(null);
+
+        // Vérifier si ils se follow déjà
 
         // Créer une nouvelle connexion
-        connection.setFollow(userToFollow);
-        connection.setFollower(currentUser);
+        follow.setFollow(userToFollow);
+        follow.setFollower(currentUser);
 
         // Sauvegarder la connexion dans la base de données
-        Connection savedConnection = connectionRepository.save(connection);
+        Follow savedConnection = followRepository.save(follow);
 
         return ResponseEntity.ok(savedConnection);
     }
@@ -46,7 +48,7 @@ public class ConnectionController {
         }
 
         // Vérifier si la connexion existe
-        boolean isFollowing = connectionRepository.findByFollowerAndFollow(follower, follow).isPresent();
+        boolean isFollowing = followRepository.findByFollowerAndFollow(follower, follow).isPresent();
 
         return ResponseEntity.ok(isFollowing);
     }
@@ -60,7 +62,7 @@ public class ConnectionController {
             return ResponseEntity.badRequest().body(null);
         }
 
-        long count = connectionRepository.countByFollow(user);
+        long count = followRepository.countByFollow(user);
         return ResponseEntity.ok(count);
     }
 
@@ -73,7 +75,7 @@ public class ConnectionController {
             return ResponseEntity.badRequest().body(null);
         }
 
-        long count = connectionRepository.countByFollower(user);
+        long count = followRepository.countByFollower(user);
         return ResponseEntity.ok(count);
     }
 }
