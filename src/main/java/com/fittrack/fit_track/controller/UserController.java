@@ -44,6 +44,18 @@ public class UserController {
         return ResponseEntity.ok(savedUser);
     }
 
+    // Récupérer les informations d'un utilisateur par ID
+    @GetMapping("/{id}")
+    public ResponseEntity<?> getUserById(@PathVariable Long id) {
+        Optional<User> userOpt = userRepository.findById(id);
+
+        if (userOpt.isEmpty()) {
+            return ResponseEntity.badRequest().body("User not found");
+        }
+
+        User user = userOpt.get();
+        return ResponseEntity.ok(user);
+    }
 
     // Questions personnelles après inscription
     @PutMapping("/user/editGoals/{id}")
