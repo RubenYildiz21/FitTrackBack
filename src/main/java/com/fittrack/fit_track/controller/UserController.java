@@ -2,15 +2,11 @@ package com.fittrack.fit_track.controller;
 
 import java.util.Optional;
 
+import com.fittrack.fit_track.model.Connection;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import com.fittrack.fit_track.model.User;
 import com.fittrack.fit_track.repository.UserRepository;
@@ -33,6 +29,19 @@ public class UserController {
         // Sauvegarder l'utilisateur après validation des informations
         User savedUser = userRepository.save(user);
         return ResponseEntity.ok(savedUser);
+    }
+
+    // Récupérer les informations d'un utilisateur par ID
+    @GetMapping("/{id}")
+    public ResponseEntity<?> getUserById(@PathVariable Long id) {
+        Optional<User> userOpt = userRepository.findById(id);
+
+        if (userOpt.isEmpty()) {
+            return ResponseEntity.badRequest().body("User not found");
+        }
+
+        User user = userOpt.get();
+        return ResponseEntity.ok(user);
     }
 
     // Questions personnelles après inscription
