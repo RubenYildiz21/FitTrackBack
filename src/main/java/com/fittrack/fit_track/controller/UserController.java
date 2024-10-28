@@ -46,7 +46,7 @@ public class UserController {
 
 
     // Questions personnelles après inscription
-    @PutMapping("/user/editGoals/{id}")
+    @PutMapping("/user/edit/{id}")
     public ResponseEntity<?> setPersonalQuestions(@PathVariable Long id, @RequestBody User userDetails) {
         Optional<User> userOpt = userRepository.findById(id);
 
