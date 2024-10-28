@@ -2,7 +2,6 @@ package com.fittrack.fit_track.controller;
 
 import java.util.Optional;
 
-import com.fittrack.fit_track.model.Connection;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;

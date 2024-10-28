@@ -3,7 +3,7 @@ package com.fittrack.fit_track.model;
 import jakarta.persistence.*;
 
 @Entity
-public class Connection {
+public class Follow {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long idConnection; // Clé primaire auto-incrémentée
