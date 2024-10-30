@@ -27,9 +27,18 @@ public class User {
     @NotBlank(message = "Password is required")
     private String password;
 
+    @NotBlank
+    private int age;
+
+    @NotBlank
+    private String trainingLevel;
+
+    private String profilePicture;
+
     // Questions personnelles
     private String gender; // Men, Woman, Gender neutral
     private String mainGoal; // Loose Weight, Keep fit, Get stronger, Gain muscles mass
+    private int goalWeight; // en kg
     private int height; // en cm
     private int weight; // en kg
     private String place; // At home, Gym
@@ -113,5 +122,37 @@ public class User {
 
     public void setPlace(String place) {
         this.place = place;
+    }
+
+    public int getGoalWeight() {
+        return goalWeight;
+    }
+
+    public void setGoalWeight(int goalWeight) {
+        this.goalWeight = goalWeight;
+    }
+
+    public int getAge() {
+        return age;
+    }
+
+    public void setAge(int age) {
+        this.age = age;
+    }
+
+    public String getProfilePicture() {
+        return profilePicture;
+    }
+
+    public void setProfilePicture(String profilePicture) {
+        this.profilePicture = profilePicture;
+    }
+
+    public String getTrainingLevel() {
+        return trainingLevel;
+    }
+
+    public void setTrainingLevel(String trainingLevel) {
+        this.trainingLevel = trainingLevel;
     }
 }
