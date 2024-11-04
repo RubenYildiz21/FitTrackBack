@@ -12,7 +12,7 @@ public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long idUser;
+    private Long id;
     
     @NotBlank(message = "First name is required")
     private String firstName;
@@ -27,20 +27,34 @@ public class User {
     @NotBlank(message = "Password is required")
     private String password;
 
+
+    private int age;
+
+    @NotBlank
+    private String trainingLevel;
+
+    private String profilePicture;
+
+    private String providerId;
+    private String provider;
+    private boolean enabled = true;
+
+
     // Questions personnelles
     private String gender; // Men, Woman, Gender neutral
     private String mainGoal; // Loose Weight, Keep fit, Get stronger, Gain muscles mass
+    private int goalWeight; // en kg
     private int height; // en cm
     private int weight; // en kg
     private String place; // At home, Gym
 
     // Getters et Setters
-    public Long getIdUser() {
-        return idUser;
+    public Long getId() {
+        return id;
     }
 
-    public void setIdUser(Long idUser) {
-        this.idUser = idUser;
+    public void setId(Long idUser) {
+        this.id = idUser;
     }
 
     public String getFirstName() {
@@ -113,5 +127,61 @@ public class User {
 
     public void setPlace(String place) {
         this.place = place;
+    }
+
+    public int getGoalWeight() {
+        return goalWeight;
+    }
+
+    public void setGoalWeight(int goalWeight) {
+        this.goalWeight = goalWeight;
+    }
+
+    public int getAge() {
+        return age;
+    }
+
+    public void setAge(int age) {
+        this.age = age;
+    }
+
+    public String getProfilePicture() {
+        return profilePicture;
+    }
+
+    public void setProfilePicture(String profilePicture) {
+        this.profilePicture = profilePicture;
+    }
+
+    public String getTrainingLevel() {
+        return trainingLevel;
+    }
+
+    public void setTrainingLevel(String trainingLevel) {
+        this.trainingLevel = trainingLevel;
+    }
+
+    public String getProvider() {
+        return provider;
+    }
+
+    public void setProvider(String provider) {
+        this.provider = provider;
+    }
+
+    public String getProviderId() {
+        return providerId;
+    }
+
+    public void setProviderId(String providerId) {
+        this.providerId = providerId;
+    }
+
+    public boolean isEnabled() {
+        return enabled;
+    }
+
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
     }
 }

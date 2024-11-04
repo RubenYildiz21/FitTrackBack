@@ -57,9 +57,9 @@ public class UserController {
         return ResponseEntity.ok(user);
     }
 
-    // Questions personnelles après inscription
-    @PutMapping("/user/editGoals/{id}")
-    public ResponseEntity<?> setPersonalQuestions(@PathVariable Long id, @RequestBody User userDetails) {
+    // Récupérer les informations d'un utilisateur par ID
+    @GetMapping("/{id}")
+    public ResponseEntity<?> getUserById(@PathVariable Long id) {
         Optional<User> userOpt = userRepository.findById(id);
 
         if (userOpt.isEmpty()) {
@@ -67,23 +67,57 @@ public class UserController {
         }
 
         User user = userOpt.get();
+        return ResponseEntity.ok(user);
+    }
+    // Questions personnelles après inscription
+    @PutMapping("/edit/user/{id}")
+    public ResponseEntity<?> setPersonalInformations(@PathVariable Long id, @RequestBody User userDetails) {
+        Optional<User> userOpt = userRepository.findById(id);
 
-        // Mettre à jour les réponses aux questions personnelles
-        user.setGender(userDetails.getGender());
-        user.setMainGoal(userDetails.getMainGoal());
+        if (userOpt.isEmpty()) {
+            return ResponseEntity.badRequest().body("User not found");
+        }
+
+        // Récuperation de l'utilisateur 
+        User user = userOpt.get();
+
+        // Mettre à jour les données personnelles 
+        user.setFirstName(userDetails.getFirstName());
+        user.setLastName(userDetails.getLastName());
         user.setHeight(userDetails.getHeight());
         user.setWeight(userDetails.getWeight());
-        user.setPlace(userDetails.getPlace());
 
         User updatedUser = userRepository.save(user);
         return ResponseEntity.ok(updatedUser);
     }
 
-// Récupérer la liste des utilisateurs
+    @PutMapping("/editGoals/user/{id}")
+    public ResponseEntity<?> setPersonalObjectives(@PathVariable Long id, @RequestBody User userDetails) {
+        Optional<User> userOpt = userRepository.findById(id);
+
+        if (userOpt.isEmpty()) {
+            return ResponseEntity.badRequest().body("User not found");
+        }
+
+        // Récuperation de l'utilisateur 
+        User user = userOpt.get();
+
+        // Mettre à jour les données personnelles 
+        user.setMainGoal(userDetails.getMainGoal());
+        user.setGoalWeight(userDetails.getGoalWeight());
+        user.setHeight(userDetails.getHeight());
+        user.setWeight(userDetails.getWeight());
+
+        User updatedUser = userRepository.save(user);
+        return ResponseEntity.ok(updatedUser);
+    }
+
+    // Récupérer la liste des utilisateurs
     @GetMapping("/users")
     public ResponseEntity<List<User>> getAllUsers() {
         List<User> users = userRepository.findAll();
         return ResponseEntity.ok(users);
     }
+
 
 }
