@@ -27,18 +27,12 @@ public class User {
     @NotBlank(message = "Password is required")
     private String password;
 
-
     private int age;
 
     @NotBlank
     private String trainingLevel;
 
     private String profilePicture;
-
-    private String providerId;
-    private String provider;
-    private boolean enabled = true;
-
 
     // Questions personnelles
     private String gender; // Men, Woman, Gender neutral
@@ -159,29 +153,5 @@ public class User {
 
     public void setTrainingLevel(String trainingLevel) {
         this.trainingLevel = trainingLevel;
-    }
-
-    public String getProvider() {
-        return provider;
-    }
-
-    public void setProvider(String provider) {
-        this.provider = provider;
-    }
-
-    public String getProviderId() {
-        return providerId;
-    }
-
-    public void setProviderId(String providerId) {
-        this.providerId = providerId;
-    }
-
-    public boolean isEnabled() {
-        return enabled;
-    }
-
-    public void setEnabled(boolean enabled) {
-        this.enabled = enabled;
     }
 }

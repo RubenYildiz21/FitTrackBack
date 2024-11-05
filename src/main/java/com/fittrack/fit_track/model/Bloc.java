@@ -1,15 +1,11 @@
 package com.fittrack.fit_track.model;
 
-import java.time.LocalTime;
-import java.util.List;
-
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.JoinTable;
-import jakarta.persistence.ManyToMany;
+import jakarta.persistence.ManyToOne;
 
 @Entity
 public class Bloc {
@@ -19,14 +15,13 @@ public class Bloc {
     
     private Integer repetition;
     private Integer serie;
-    private LocalTime tempsRepos;
-    private LocalTime tempsDeRepetition;
+    private String tempsRepos;
+    private String tempsDeRepetition;
     private Double poids;
 
-    // Relations : Un bloc contient plusieurs exercices
-    @ManyToMany
-    @JoinTable(name = "repeter", joinColumns = @JoinColumn(name = "idBloc"), inverseJoinColumns = @JoinColumn(name = "idExercice"))
-    private List<Exercice> exercices;
+    @ManyToOne
+    @JoinColumn(name = "idExercice", nullable = false)
+    private Exercice exercice;
 
     // Getters and Setters
 
@@ -54,19 +49,19 @@ public class Bloc {
         this.serie = serie;
     }
 
-    public LocalTime getTempsRepos() {
+    public String getTempsRepos() {
         return tempsRepos;
     }
 
-    public void setTempsRepos(LocalTime tempsRepos) {
+    public void setTempsRepos(String tempsRepos) {
         this.tempsRepos = tempsRepos;
     }
 
-    public LocalTime getTempsDeRepetition() {
+    public String getTempsDeRepetition() {
         return tempsDeRepetition;
     }
 
-    public void setTempsDeRepetition(LocalTime tempsDeRepetition) {
+    public void setTempsDeRepetition(String tempsDeRepetition) {
         this.tempsDeRepetition = tempsDeRepetition;
     }
 
@@ -78,11 +73,11 @@ public class Bloc {
         this.poids = poids;
     }
 
-    public List<Exercice> getExercices() {
-        return exercices;
+    public Exercice getExercice() {
+        return exercice;
     }
 
-    public void setExercices(List<Exercice> exercices) {
-        this.exercices = exercices;
+    public void setExercice(Exercice exercice) {
+        this.exercice = exercice;
     }
 }

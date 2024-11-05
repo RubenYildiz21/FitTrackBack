@@ -1,12 +1,14 @@
 package com.fittrack.fit_track.model;
 
-import java.util.List;
+import com.fittrack.fit_track.model.enums.Equipement;
+import com.fittrack.fit_track.model.enums.PartieCorps;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.ManyToMany;
 
 @Entity
 public class Exercice {
@@ -19,9 +21,12 @@ public class Exercice {
     private String lienVideo;
     private String materiel;
 
-    // Relations
-    @ManyToMany(mappedBy = "exercices")
-    private List<Bloc> blocs;
+    @Enumerated(EnumType.STRING)
+    private PartieCorps partieCorps;
+
+    @Enumerated(EnumType.STRING)
+    private Equipement equipementNecessaire;
+
 
     // Getters and Setters
 
@@ -65,11 +70,19 @@ public class Exercice {
         this.materiel = materiel;
     }
 
-    public List<Bloc> getBlocs() {
-        return blocs;
+    public PartieCorps getPartieCorps() {
+        return partieCorps;
     }
 
-    public void setBlocs(List<Bloc> blocs) {
-        this.blocs = blocs;
+    public void setPartieCorps(PartieCorps partieCorps) {
+        this.partieCorps = partieCorps;
+    }
+
+    public Equipement getEquipementNecessaire() {
+        return equipementNecessaire;
+    }
+
+    public void setEquipementNecessaire(Equipement equipementNecessaire) {
+        this.equipementNecessaire = equipementNecessaire;
     }
 }
