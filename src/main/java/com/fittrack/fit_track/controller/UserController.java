@@ -56,6 +56,7 @@ public class UserController {
         User user = userOpt.get();
         return ResponseEntity.ok(user);
     }
+
     // Questions personnelles après inscription
     @PutMapping("/edit/user/{id}")
     public ResponseEntity<?> setPersonalInformations(@PathVariable Long id, @RequestBody User userDetails) {
