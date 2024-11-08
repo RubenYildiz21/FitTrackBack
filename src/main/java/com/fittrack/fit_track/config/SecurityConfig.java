@@ -24,26 +24,31 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-            .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-            .csrf(csrf -> csrf.disable())
-            .authorizeHttpRequests(auth -> auth
-                .requestMatchers(
-                    "/api/auth/**", 
-                    "/login", 
-                    "/oauth2/**", 
-                    "/login/oauth2/code/**",
-                    "/swagger-ui/**",
-                    "/swagger-ui.html",
-                    "/v3/api-docs/**",
-                    "/swagger-resources/**"
-                ).permitAll()
-                .anyRequest().authenticated()
-            )
-            .oauth2Login(oauth2 -> oauth2
-                .userInfoEndpoint(userInfo -> userInfo
-                    .userService(customOAuth2UserService)
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+                .csrf(csrf -> csrf.disable())
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers(
+                                "/api/**",
+                                "/login",
+                                "/oauth2/**",
+                                "/login/oauth2/code/**",
+                                "/swagger-ui/**",
+                                "/swagger-ui.html",
+                                "/v3/api-docs/**",
+                                "/swagger-resources/**"
+                        ).permitAll()
+                        .anyRequest().authenticated()
                 )
-            );
+                /*
+                .oauth2Login(oauth2 -> oauth2
+                    .userInfoEndpoint(userInfo -> userInfo
+                        .userService(customOAuth2UserService)
+                    )
+                )
+                */
+                .oauth2Login(oauth2 -> oauth2.disable())  // Désactiver OAuth2
+                .formLogin(form -> form.disable())        // Désactiver form login
+                .httpBasic(basic -> basic.disable());     // Désactiver basic auth;
 
         return http.build();
     }

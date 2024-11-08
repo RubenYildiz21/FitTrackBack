@@ -17,4 +17,7 @@ public interface FollowRepository extends JpaRepository<Follow, Long> {
 
     // nombre d'utilisateurs suivis par un utilisateur
     long countByFollower(User follower);
+
+    // verifier si il follow deja l'user
+    boolean existsByFollowerAndFollow(User currentUser, User userToFollow);
 }

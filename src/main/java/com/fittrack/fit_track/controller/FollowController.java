@@ -1,14 +1,10 @@
 package com.fittrack.fit_track.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import com.fittrack.fit_track.model.Follow;
 import com.fittrack.fit_track.model.User;
@@ -25,16 +21,25 @@ public class FollowController {
     @Autowired
     private UserRepository userRepository;
 
-    // Follow un user
     @PostMapping("/follow")
-    public ResponseEntity<?> followUser(@Validated @RequestBody Follow follow) {
+    public ResponseEntity<?> followUser(@RequestParam Long followerId, @RequestParam Long followId) {
         // Vérifier si l'utilisateur à suivre existe
-        User userToFollow = userRepository.findById(follow.getFollow().getId()).orElse(null);
-        User currentUser = userRepository.findById(follow.getFollower().getId()).orElse(null);
+        User userToFollow = userRepository.findById(followId).orElse(null);
+        User currentUser = userRepository.findById(followerId).orElse(null);
+
+        // Vérifier si les utilisateurs existent
+        if (userToFollow == null || currentUser == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Utilisateur introuvable.");
+        }
 
         // Vérifier si ils se follow déjà
+        boolean alreadyFollowing = followRepository.existsByFollowerAndFollow(currentUser, userToFollow);
+        if (alreadyFollowing) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Vous suivez déjà cet utilisateur.");
+        }
 
         // Créer une nouvelle connexion
+        Follow follow = new Follow(); // Créez une nouvelle instance de Follow
         follow.setFollow(userToFollow);
         follow.setFollower(currentUser);
 
