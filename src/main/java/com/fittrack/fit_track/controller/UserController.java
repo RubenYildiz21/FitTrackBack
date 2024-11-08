@@ -91,8 +91,13 @@ public class UserController {
     }
 
     // Questions personnelles après inscription
+<<<<<<< HEAD
     @PutMapping("/edit/user/{id}")
     public ResponseEntity<?> setPersonalInformations(@PathVariable Long id, @RequestBody User userDetails) {
+=======
+    @PutMapping("/user/edit/{id}")
+    public ResponseEntity<?> setPersonalQuestions(@PathVariable Long id, @RequestBody User userDetails) {
+>>>>>>> 0938d85 (name api)
         Optional<User> userOpt = userRepository.findById(id);
 
         if (userOpt.isEmpty()) {
