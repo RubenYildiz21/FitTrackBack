@@ -1,9 +1,11 @@
 package com.fittrack.fit_track.controller;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.validation.annotation.Validated;
@@ -11,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 
 import com.fittrack.fit_track.model.User;
 import com.fittrack.fit_track.repository.UserRepository;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -25,13 +28,49 @@ public class UserController {
 
     // S'inscrire avec les informations personnelles
     @PostMapping("/register")
-    public ResponseEntity<?> registerUser(@Validated @RequestBody User user) {
+    public ResponseEntity<?> registerUser(
+            @RequestParam("firstName") String firstName,
+            @RequestParam("lastName") String lastName,
+            @RequestParam("email") String email,
+            @RequestParam("password") String password,
+            @RequestParam(value = "profilePicture", required = false) MultipartFile profilePicture,
+            @RequestParam("age") int age,
+            @RequestParam("trainingLevel") String trainingLevel,
+            @RequestParam("gender") String gender,
+            @RequestParam("mainGoal") String mainGoal,
+            @RequestParam("goalWeight") int goalWeight,
+            @RequestParam("height") int height,
+            @RequestParam("weight") int weight,
+            @RequestParam("place") String place) {
+
         // Vérifier si l'email est déjà utilisé
-        if (userRepository.findByEmail(user.getEmail()).isPresent()) {
+        if (userRepository.findByEmail(email).isPresent()) {
             return ResponseEntity.badRequest().body("Email already in use");
         }
 
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
+        // Créer un nouvel utilisateur
+        User user = new User();
+        user.setFirstName(firstName);
+        user.setLastName(lastName);
+        user.setEmail(email);
+        user.setPassword(passwordEncoder.encode(password));
+        user.setAge(age);
+        user.setTrainingLevel(trainingLevel);
+        user.setGender(gender);
+        user.setMainGoal(mainGoal);
+        user.setGoalWeight(goalWeight);
+        user.setHeight(height);
+        user.setWeight(weight);
+        user.setPlace(place);
+
+        // Enregistrer l'image en tant que tableau de bytes
+        if (profilePicture != null && !profilePicture.isEmpty()) {
+            try {
+                user.setProfilePicture(profilePicture.getBytes());
+            } catch (IOException e) {
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error saving profile picture");
+            }
+        }
 
         // Sauvegarder l'utilisateur après validation des informations
         User savedUser = userRepository.save(user);

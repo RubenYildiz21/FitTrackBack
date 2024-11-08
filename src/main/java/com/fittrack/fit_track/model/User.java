@@ -1,9 +1,6 @@
 package com.fittrack.fit_track.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 
@@ -33,11 +30,8 @@ public class User {
     @NotBlank
     private String trainingLevel;
 
-    private String profilePicture;
-
-    private String providerId;
-    private String provider;
-    private boolean enabled = true;
+    @Lob
+    private byte[] profilePicture;
 
 
     // Questions personnelles
@@ -145,11 +139,11 @@ public class User {
         this.age = age;
     }
 
-    public String getProfilePicture() {
+    public byte[] getProfilePicture() {
         return profilePicture;
     }
 
-    public void setProfilePicture(String profilePicture) {
+    public void setProfilePicture(byte[] profilePicture) {
         this.profilePicture = profilePicture;
     }
 
@@ -161,27 +155,6 @@ public class User {
         this.trainingLevel = trainingLevel;
     }
 
-    public String getProvider() {
-        return provider;
-    }
 
-    public void setProvider(String provider) {
-        this.provider = provider;
-    }
 
-    public String getProviderId() {
-        return providerId;
-    }
-
-    public void setProviderId(String providerId) {
-        this.providerId = providerId;
-    }
-
-    public boolean isEnabled() {
-        return enabled;
-    }
-
-    public void setEnabled(boolean enabled) {
-        this.enabled = enabled;
-    }
 }
