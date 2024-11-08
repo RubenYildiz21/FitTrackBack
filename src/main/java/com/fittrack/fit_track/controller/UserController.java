@@ -8,12 +8,18 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.fittrack.fit_track.model.User;
 import com.fittrack.fit_track.repository.UserRepository;
-import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -91,16 +97,8 @@ public class UserController {
     }
 
     // Questions personnelles après inscription
-<<<<<<< HEAD
-<<<<<<< HEAD
     @PutMapping("/edit/user/{id}")
     public ResponseEntity<?> setPersonalInformations(@PathVariable Long id, @RequestBody User userDetails) {
-=======
-=======
->>>>>>> 0938d85 (name api)
-    @PutMapping("/user/edit/{id}")
-    public ResponseEntity<?> setPersonalQuestions(@PathVariable Long id, @RequestBody User userDetails) {
->>>>>>> 0938d85 (name api)
         Optional<User> userOpt = userRepository.findById(id);
 
         if (userOpt.isEmpty()) {
