@@ -11,6 +11,11 @@ import com.fittrack.fit_track.model.User;
 import com.fittrack.fit_track.repository.FollowRepository;
 import com.fittrack.fit_track.repository.UserRepository;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+
 @RestController
 @RequestMapping("/api/connection")
 public class FollowController {
@@ -22,31 +27,39 @@ public class FollowController {
     private UserRepository userRepository;
 
     @PostMapping("/follow")
-    public ResponseEntity<?> followUser(@RequestParam Long followerId, @RequestParam Long followId) {
+    public ResponseEntity<Map<String, Object>> followUser(@RequestParam Long followerId, @RequestParam Long followId) {
+        Map<String, Object> response = new HashMap<>();
+
         // Vérifier si l'utilisateur à suivre existe
         User userToFollow = userRepository.findById(followId).orElse(null);
         User currentUser = userRepository.findById(followerId).orElse(null);
 
         // Vérifier si les utilisateurs existent
         if (userToFollow == null || currentUser == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Utilisateur introuvable.");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
         }
 
-        // Vérifier si ils se follow déjà
-        boolean alreadyFollowing = followRepository.existsByFollowerAndFollow(currentUser, userToFollow);
-        if (alreadyFollowing) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Vous suivez déjà cet utilisateur.");
+        // Check if the current user already follows the other user
+        Optional<Follow> existingFollow = followRepository.findByFollowerAndFollow(currentUser, userToFollow);
+
+        if (existingFollow.isPresent()) {
+            // If they are already following, remove the follow relationship
+            followRepository.delete(existingFollow.get());
+            response.put("message", "Vous avez arrêté de suivre cet utilisateur.");
+            response.put("action", "unfollow");
+        } else {
+            // Otherwise, create a new follow relationship
+            Follow newFollow = new Follow();
+            newFollow.setFollow(userToFollow);
+            newFollow.setFollower(currentUser);
+
+            Follow savedFollow = followRepository.save(newFollow);
+            response.put("message", "Vous avez commencé à suivre cet utilisateur.");
+            response.put("action", "follow");
+            response.put("followData", savedFollow);
         }
 
-        // Créer une nouvelle connexion
-        Follow follow = new Follow(); // Créez une nouvelle instance de Follow
-        follow.setFollow(userToFollow);
-        follow.setFollower(currentUser);
-
-        // Sauvegarder la connexion dans la base de données
-        Follow savedConnection = followRepository.save(follow);
-
-        return ResponseEntity.ok(savedConnection);
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/isFollowing/{followerId}/{followId}")
@@ -62,6 +75,20 @@ public class FollowController {
         boolean isFollowing = followRepository.findByFollowerAndFollow(follower, follow).isPresent();
 
         return ResponseEntity.ok(isFollowing);
+    }
+
+    @GetMapping("/allFollow/{followerId}")
+    public ResponseEntity<List<Long>> allFollow(@PathVariable Long followerId) {
+        User follower = userRepository.findById(followerId).orElse(null);
+
+        if (follower == null) {
+            return ResponseEntity.badRequest().body(null);
+        }
+
+        // Retrieve the list of followed user IDs
+        List<Long> followedUserIds = followRepository.findFollowedUserIds(followerId);
+
+        return ResponseEntity.ok(followedUserIds);
     }
 
     // Méthode pour compter le nombre de followers d'un utilisateur
