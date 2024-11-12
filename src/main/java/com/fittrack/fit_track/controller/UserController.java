@@ -146,5 +146,20 @@ public class UserController {
         return ResponseEntity.ok(users);
     }
 
+    // Récupérer la liste des utilisateurs apres une recherche
+    @GetMapping("/users/search")
+    public ResponseEntity<List<User>> searchUsers(@RequestParam("query") String searchTerm) {
+        String firstName = searchTerm;
+        String lastName = searchTerm;
 
+        // Si le terme de recherche contient un espace, on suppose qu'il s'agit de "Prénom Nom"
+        String[] parts = searchTerm.split(" ");
+        if (parts.length >= 2) {
+            firstName = parts[0];
+            lastName = parts[1];
+        }
+
+        List<User> users = userRepository.findWithSearch(firstName, lastName, searchTerm);
+        return ResponseEntity.ok(users);
+    }
 }
