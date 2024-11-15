@@ -1,19 +1,20 @@
 package com.fittrack.fit_track.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import com.fittrack.fit_track.model.Follow;
 import com.fittrack.fit_track.model.User;
 import com.fittrack.fit_track.repository.FollowRepository;
 import com.fittrack.fit_track.repository.UserRepository;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/connection")
@@ -25,23 +26,40 @@ public class FollowController {
     @Autowired
     private UserRepository userRepository;
 
-    // Follow un user
     @PostMapping("/follow")
-    public ResponseEntity<?> followUser(@Validated @RequestBody Follow follow) {
+    public ResponseEntity<Map<String, Object>> followUser(@RequestParam Long followerId, @RequestParam Long followId) {
+        Map<String, Object> response = new HashMap<>();
+
         // Vérifier si l'utilisateur à suivre existe
-        User userToFollow = userRepository.findById(follow.getFollow().getId()).orElse(null);
-        User currentUser = userRepository.findById(follow.getFollower().getId()).orElse(null);
+        User userToFollow = userRepository.findById(followId).orElse(null);
+        User currentUser = userRepository.findById(followerId).orElse(null);
 
-        // Vérifier si ils se follow déjà
+        // Vérifier si les utilisateurs existent
+        if (userToFollow == null || currentUser == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+        }
 
-        // Créer une nouvelle connexion
-        follow.setFollow(userToFollow);
-        follow.setFollower(currentUser);
+        // Check if the current user already follows the other user
+        Optional<Follow> existingFollow = followRepository.findByFollowerAndFollow(currentUser, userToFollow);
 
-        // Sauvegarder la connexion dans la base de données
-        Follow savedConnection = followRepository.save(follow);
+        if (existingFollow.isPresent()) {
+            // If they are already following, remove the follow relationship
+            followRepository.delete(existingFollow.get());
+            response.put("message", "Vous avez arrêté de suivre cet utilisateur.");
+            response.put("action", "unfollow");
+        } else {
+            // Otherwise, create a new follow relationship
+            Follow newFollow = new Follow();
+            newFollow.setFollow(userToFollow);
+            newFollow.setFollower(currentUser);
 
-        return ResponseEntity.ok(savedConnection);
+            Follow savedFollow = followRepository.save(newFollow);
+            response.put("message", "Vous avez commencé à suivre cet utilisateur.");
+            response.put("action", "follow");
+            response.put("followData", savedFollow);
+        }
+
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/isFollowing/{followerId}/{followId}")
@@ -57,6 +75,20 @@ public class FollowController {
         boolean isFollowing = followRepository.findByFollowerAndFollow(follower, follow).isPresent();
 
         return ResponseEntity.ok(isFollowing);
+    }
+
+    @GetMapping("/allFollow/{followerId}")
+    public ResponseEntity<List<Long>> allFollow(@PathVariable Long followerId) {
+        User follower = userRepository.findById(followerId).orElse(null);
+
+        if (follower == null) {
+            return ResponseEntity.badRequest().body(null);
+        }
+
+        // Retrieve the list of followed user IDs
+        List<Long> followedUserIds = followRepository.findFollowedUserIds(followerId);
+
+        return ResponseEntity.ok(followedUserIds);
     }
 
     // Méthode pour compter le nombre de followers d'un utilisateur
