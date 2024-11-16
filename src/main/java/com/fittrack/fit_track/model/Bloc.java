@@ -23,6 +23,10 @@ public class Bloc {
     @JoinColumn(name = "idExercice", nullable = false)
     private Exercice exercice;
 
+    @ManyToOne
+    @JoinColumn(name = "idSeance", nullable = false)
+    private Seance seance;
+
     // Getters and Setters
 
     public Long getIdBloc() {
@@ -79,5 +83,13 @@ public class Bloc {
 
     public void setExercice(Exercice exercice) {
         this.exercice = exercice;
+    }
+
+    public Seance getSeance() {
+        return seance;
+    }
+
+    public void setSeance(Seance seance) {
+        this.seance = seance;
     }
 }

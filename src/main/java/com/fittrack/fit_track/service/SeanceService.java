@@ -6,6 +6,7 @@ import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
 import com.fittrack.fit_track.model.Bloc;
@@ -20,6 +21,7 @@ import jakarta.validation.Valid;
 
 @Service
 @Validated
+@Transactional
 public class SeanceService {
 
     @Autowired

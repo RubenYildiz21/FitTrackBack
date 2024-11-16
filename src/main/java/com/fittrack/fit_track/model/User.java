@@ -1,6 +1,10 @@
 package com.fittrack.fit_track.model;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Lob;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 
@@ -24,7 +28,6 @@ public class User {
     @NotBlank(message = "Password is required")
     private String password;
 
-
     private int age;
 
     @NotBlank
@@ -32,7 +35,6 @@ public class User {
 
     @Lob
     private byte[] profilePicture;
-
 
     // Questions personnelles
     private String gender; // Men, Woman, Gender neutral
@@ -154,7 +156,4 @@ public class User {
     public void setTrainingLevel(String trainingLevel) {
         this.trainingLevel = trainingLevel;
     }
-
-
-
 }

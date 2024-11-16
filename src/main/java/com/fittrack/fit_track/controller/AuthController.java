@@ -7,6 +7,10 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -15,8 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.fittrack.fit_track.model.User;
 import com.fittrack.fit_track.repository.UserRepository;
-
-
+import com.fittrack.fit_track.utils.JwtUtils;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -28,29 +31,11 @@ public class AuthController {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-    /**@PostMapping("/login")
-    public User login(@RequestParam String email, @RequestParam String password) {
-        Optional<User> userOptional = userRepository.findByEmail(email);
-        Map<String, String> response = new HashMap<>();
+    @Autowired
+    private AuthenticationManager authenticationManager;
 
-        if (userOptional.isPresent()) {
-            User user = userOptional.get();
-            if (passwordEncoder.matches(password, user.getPassword())) {
-                response.put("message", "Connexion succes");
-                return user;
-                //return ResponseEntity.ok(response);
-            } else {
-                response.put("message", "Password wrong");
-                return null;
-                //return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
-            }
-        } else {
-            response.put("message", "User not found");
-            return null;
-            //return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
-        }
-    }*/
-
+    @Autowired
+    private JwtUtils jwtUtils;
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestParam String email, @RequestParam String password) {
@@ -59,8 +44,17 @@ public class AuthController {
         if (userOptional.isPresent()) {
             User user = userOptional.get();
             if (passwordEncoder.matches(password, user.getPassword())) {
-                // Return essential user data only or a DTO
-                return ResponseEntity.ok(user);
+                Authentication authentication = authenticationManager.authenticate(
+                        new UsernamePasswordAuthenticationToken(email, password));
+                SecurityContextHolder.getContext().setAuthentication(authentication);
+
+                String jwt = jwtUtils.generateJwtToken(authentication);
+
+                Map<String, Object> response = new HashMap<>();
+                response.put("token", jwt);
+                response.put("user", user);
+
+                return ResponseEntity.ok(response);
             } else {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Password incorrect");
             }

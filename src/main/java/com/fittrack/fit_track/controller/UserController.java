@@ -31,7 +31,6 @@ public class UserController {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-
     // S'inscrire avec les informations personnelles
     @PostMapping("/register")
     public ResponseEntity<?> registerUser(

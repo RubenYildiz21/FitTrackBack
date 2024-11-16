@@ -28,6 +28,12 @@ public class SeanceController {
     @Autowired
     private SeanceService seanceService;
 
+    /**
+     * Creates a new workout session.
+     *
+     * @param seance the workout session to be created
+     * @return ResponseEntity containing the created session or an error message
+     */
     @PostMapping
     public ResponseEntity<?> enregistrerSeance(@Valid @RequestBody Seance seance) {
         try {
@@ -38,6 +44,13 @@ public class SeanceController {
         }
     }
 
+
+    /**
+     * Retrieves a workout session by its ID.
+     *
+     * @param id the ID of the workout session to retrieve
+     * @return ResponseEntity containing the found session or a not found response
+     */
     @GetMapping("/{id}")
     public ResponseEntity<?> getSeance(@PathVariable Long id) {
         return seanceService.getSeance(id)
@@ -45,12 +58,24 @@ public class SeanceController {
             .orElse(ResponseEntity.notFound().build());
     }
 
+    /**
+     * Filters exercices by part of the body.
+     *
+     * @param partieCorps the part of the body to filter by
+     * @return ResponseEntity containing the filtered exercices
+     */
     @GetMapping("/exercices/partie-corps/{partieCorps}")
     public ResponseEntity<List<Exercice>> filtrerExercicesParPartieCorps(
             @PathVariable PartieCorps partieCorps) {
         return ResponseEntity.ok(seanceService.filtrerExercices(partieCorps));
     }
 
+    /**
+     * Filters exercices by equipment.
+     *
+     * @param equipement the equipment to filter by
+     * @return ResponseEntity containing the filtered exercices
+     */
     @GetMapping("/exercices/equipement/{equipement}")
     public ResponseEntity<List<Exercice>> filtrerExercicesParEquipement(
             @PathVariable Equipement equipement) {
