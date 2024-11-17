@@ -13,13 +13,15 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.fittrack.fit_track.dto.LoginRequest;
 import com.fittrack.fit_track.model.User;
 import com.fittrack.fit_track.repository.UserRepository;
 import com.fittrack.fit_track.utils.JwtUtils;
+
 
 @RestController
 @RequestMapping("/api/auth")
@@ -38,7 +40,12 @@ public class AuthController {
     private JwtUtils jwtUtils;
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestParam String email, @RequestParam String password) {
+    public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) {
+        System.out.println("Login endpoint called");
+        System.out.println("Received email: " + loginRequest.getEmail());
+        String email = loginRequest.getEmail();
+        String password = loginRequest.getPassword();
+
         Optional<User> userOptional = userRepository.findByEmail(email);
 
         if (userOptional.isPresent()) {
