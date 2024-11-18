@@ -1,23 +1,28 @@
 package com.fittrack.fit_track.controller;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import com.fittrack.fit_track.model.Follow;
 import com.fittrack.fit_track.model.User;
 import com.fittrack.fit_track.repository.FollowRepository;
 import com.fittrack.fit_track.repository.UserRepository;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-
 @RestController
-@RequestMapping("/api/connection")
+@RequestMapping("/api/follows")
 public class FollowController {
 
     @Autowired
@@ -26,7 +31,8 @@ public class FollowController {
     @Autowired
     private UserRepository userRepository;
 
-    @PostMapping("/follow")
+    @PostMapping
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<Map<String, Object>> followUser(@RequestParam Long followerId, @RequestParam Long followId) {
         Map<String, Object> response = new HashMap<>();
 
@@ -63,6 +69,7 @@ public class FollowController {
     }
 
     @GetMapping("/isFollowing/{followerId}/{followId}")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<Boolean> isFollowing(@PathVariable Long followerId, @PathVariable Long followId) {
         User follower = userRepository.findById(followerId).orElse(null);
         User follow = userRepository.findById(followId).orElse(null);
@@ -77,7 +84,8 @@ public class FollowController {
         return ResponseEntity.ok(isFollowing);
     }
 
-    @GetMapping("/allFollow/{followerId}")
+    @GetMapping("/{followerId}/following")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<List<Long>> allFollow(@PathVariable Long followerId) {
         User follower = userRepository.findById(followerId).orElse(null);
 
@@ -92,7 +100,8 @@ public class FollowController {
     }
 
     // Méthode pour compter le nombre de followers d'un utilisateur
-    @GetMapping("/followersCount/{userId}")
+    @GetMapping("/{userId}/followers/count")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<Long> getFollowersCount(@PathVariable Long userId) {
         User user = userRepository.findById(userId).orElse(null);
 
@@ -101,11 +110,13 @@ public class FollowController {
         }
 
         long count = followRepository.countByFollow(user);
+        System.out.println("follower count : " + count);
         return ResponseEntity.ok(count);
     }
 
     // Méthode pour compter le nombre d'utilisateurs suivis par un utilisateur
-    @GetMapping("/followingCount/{userId}")
+    @GetMapping("/{userId}/following/count")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<Long> getFollowingCount(@PathVariable Long userId) {
         User user = userRepository.findById(userId).orElse(null);
 

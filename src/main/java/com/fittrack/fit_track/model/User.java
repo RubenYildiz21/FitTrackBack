@@ -1,9 +1,18 @@
 package com.fittrack.fit_track.model;
 
+import java.util.Set;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
+import jakarta.persistence.CollectionTable;
+import jakarta.persistence.Column;
+import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
 import jakarta.persistence.Lob;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -26,6 +35,7 @@ public class User {
     private String email;
 
     @NotBlank(message = "Password is required")
+    @JsonIgnore
     private String password;
 
     private int age;
@@ -43,6 +53,11 @@ public class User {
     private int height; // en cm
     private int weight; // en kg
     private String place; // At home, Gym
+
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id"))
+    @Column(name = "role")
+    private Set<String> roles;
 
     // Getters et Setters
     public Long getId() {
@@ -155,5 +170,13 @@ public class User {
 
     public void setTrainingLevel(String trainingLevel) {
         this.trainingLevel = trainingLevel;
+    }
+
+    public Set<String> getRoles() {
+        return roles;
+    }
+
+    public void setRoles(Set<String> roles) {
+        this.roles = roles;
     }
 }

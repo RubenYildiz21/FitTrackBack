@@ -3,6 +3,7 @@ package com.fittrack.fit_track.controller;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -20,14 +21,14 @@ public class BlocController {
     private BlocRepository blocRepository;
 
     @GetMapping
+    @PreAuthorize("isAuthenticated()")
     public List<Bloc> getAllBlocs() {
         return blocRepository.findAll();
     }
 
     @PostMapping
+    @PreAuthorize("isAuthenticated()")
     public Bloc createBloc(@RequestBody Bloc bloc) {
         return blocRepository.save(bloc);
     }
-
-    // Ajoutez d'autres méthodes CRUD ici...
 }

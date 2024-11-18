@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.fittrack.fit_track.model.Exercice;
@@ -59,26 +60,22 @@ public class SeanceController {
     }
 
     /**
-     * Filters exercices by part of the body.
+     * Filtrer les exercices par partie du corps.
      *
-     * @param partieCorps the part of the body to filter by
-     * @return ResponseEntity containing the filtered exercices
+     * @param partieCorps la partie du corps à filtrer
+     * @return ResponseEntity contenant les exercices filtrés
      */
-    @GetMapping("/exercices/partie-corps/{partieCorps}")
-    public ResponseEntity<List<Exercice>> filtrerExercicesParPartieCorps(
-            @PathVariable PartieCorps partieCorps) {
-        return ResponseEntity.ok(seanceService.filtrerExercices(partieCorps));
-    }
+    @GetMapping("/exercices")
+    public ResponseEntity<List<Exercice>> filtrerExercices(
+            @RequestParam(required = false) PartieCorps partieCorps,
+            @RequestParam(required = false) Equipement equipement) {
 
-    /**
-     * Filters exercices by equipment.
-     *
-     * @param equipement the equipment to filter by
-     * @return ResponseEntity containing the filtered exercices
-     */
-    @GetMapping("/exercices/equipement/{equipement}")
-    public ResponseEntity<List<Exercice>> filtrerExercicesParEquipement(
-            @PathVariable Equipement equipement) {
-        return ResponseEntity.ok(seanceService.filtrerExercices(equipement));
+        if (partieCorps != null) {
+            return ResponseEntity.ok(seanceService.filtrerExercices(partieCorps));
+        } else if (equipement != null) {
+            return ResponseEntity.ok(seanceService.filtrerExercices(equipement));
+        } else {
+            return ResponseEntity.badRequest().body(null);
+        }
     }
 } 
