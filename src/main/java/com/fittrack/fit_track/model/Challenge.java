@@ -2,6 +2,7 @@ package com.fittrack.fit_track.model;
 
 import jakarta.persistence.*;
 import java.time.LocalDate;
+import java.util.Set;
 
 @Entity
 public class Challenge {
@@ -14,6 +15,8 @@ public class Challenge {
     private String exercise;
     private LocalDate beginingDate;
     private LocalDate endingDate;
+    private String description;
+
 
     // Getters and Setters
     public Long getId() {
@@ -62,5 +65,14 @@ public class Challenge {
 
     public void setEndingDate(LocalDate endingDate) {
         this.endingDate = endingDate;
+    }
+
+    public String getDescription() {
+
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 }
