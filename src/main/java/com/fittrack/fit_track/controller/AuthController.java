@@ -53,7 +53,7 @@ public class AuthController {
     @Autowired
     private UserMapper userMapper; 
 
-    
+
     @PostMapping("/login")
     public ResponseEntity<?> login(@Valid @RequestBody LoginRequest loginRequest, BindingResult bindingResult) {
         System.out.println("Login attempt for email: " + loginRequest.getEmail());
@@ -149,7 +149,7 @@ public class AuthController {
         // Sauvegarder l'utilisateur après validation des informations
         User savedUser = userRepository.save(user);
 
-        UserDTO userDTO = UserMapper.INSTANCE.userToUserDTO(savedUser);
+        UserDTO userDTO = userMapper.userToUserDTO(savedUser);
 
         // Préparer la réponse avec DTO
         RegisterResponseDTO registerResponse = new RegisterResponseDTO();

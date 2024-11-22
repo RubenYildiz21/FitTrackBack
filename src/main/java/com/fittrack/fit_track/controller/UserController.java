@@ -27,6 +27,8 @@ public class UserController {
     private UserRepository userRepository;
 
 
+    @Autowired
+    private UserMapper userMapper;
     // Récupérer les informations d'un utilisateur par ID
     @GetMapping("/{id}")
     public ResponseEntity<?> getUserById(@PathVariable Long id) {
@@ -36,7 +38,7 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
         }
 
-        UserDTO userDTO = UserMapper.INSTANCE.userToUserDTO(userOpt.get());
+        UserDTO userDTO = userMapper.userToUserDTO(userOpt.get());
         return ResponseEntity.ok(userDTO);
     }
 
@@ -59,7 +61,7 @@ public class UserController {
         user.setWeight(userDetailsDTO.getWeight());
 
         User updatedUser = userRepository.save(user);
-        UserDTO updatedUserDTO = UserMapper.INSTANCE.userToUserDTO(updatedUser);
+        UserDTO updatedUserDTO = userMapper.userToUserDTO(updatedUser);
         return ResponseEntity.ok(updatedUserDTO);
     }
 
@@ -81,7 +83,7 @@ public class UserController {
         user.setWeight(userDetailsDTO.getWeight());
 
         User updatedUser = userRepository.save(user);
-        UserDTO updatedUserDTO = UserMapper.INSTANCE.userToUserDTO(updatedUser);
+        UserDTO updatedUserDTO = userMapper.userToUserDTO(updatedUser);
         return ResponseEntity.ok(updatedUserDTO);
     }
 
@@ -90,7 +92,7 @@ public class UserController {
     public ResponseEntity<List<UserDTO>> getAllUsers() {
         List<User> users = userRepository.findAll();
         List<UserDTO> userDTOs = users.stream()
-                                      .map(UserMapper.INSTANCE::userToUserDTO)
+                                      .map(userMapper::userToUserDTO)
                                       .toList();
         return ResponseEntity.ok(userDTOs);
     }
@@ -110,7 +112,7 @@ public class UserController {
 
         List<User> users = userRepository.findWithSearch(firstName, lastName, searchTerm);
         List<UserDTO> userDTOs = users.stream()
-                                      .map(UserMapper.INSTANCE::userToUserDTO)
+                                      .map(userMapper::userToUserDTO)
                                       .toList();
         return ResponseEntity.ok(userDTOs);
     }
