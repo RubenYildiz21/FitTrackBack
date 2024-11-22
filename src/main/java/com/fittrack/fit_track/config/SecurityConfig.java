@@ -18,6 +18,8 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import com.fittrack.fit_track.security.JwtTokenFilter;
 import com.fittrack.fit_track.service.CustomUserDetailsService;
@@ -25,7 +27,7 @@ import com.fittrack.fit_track.service.CustomUserDetailsService;
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity(prePostEnabled = true)
-public class SecurityConfig {
+public class SecurityConfig implements WebMvcConfigurer {
 
     @Autowired
     private JwtTokenFilter jwtTokenFilter;
@@ -105,4 +107,11 @@ public class SecurityConfig {
         return source;
     }
 
+
+    @Override
+    public void addResourceHandlers(ResourceHandlerRegistry registry) {
+        // Mapping URL "/uploads/" vers le dossier physique "C:/uploads"
+        registry.addResourceHandler("/uploads/")
+                .addResourceLocations("file:C:/uploads/");
+    }
 }

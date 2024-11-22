@@ -3,7 +3,7 @@ package com.fittrack.fit_track.dto;
 import java.util.Map;
 
 public class ProgressDTO {
-    private Map<String, Integer> repetitionsPerPeriod; // e.g., per week
+    private Map<String, Integer> repetitionsPerPeriod; 
     private Map<String, Double> caloriesBurnedPerPeriod;
     private Map<String, Double> distancePerPeriod;
     

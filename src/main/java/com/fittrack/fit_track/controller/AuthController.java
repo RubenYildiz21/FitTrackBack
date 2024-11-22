@@ -1,9 +1,11 @@
 package com.fittrack.fit_track.controller;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -51,8 +53,16 @@ public class AuthController {
     private JwtUtils jwtUtils;
 
     @Autowired
-    private UserMapper userMapper; 
+    private UserMapper userMapper;
 
+    @Value("${app.upload.dir.windows}")
+    private String uploadDirWindows;
+
+    @Value("${app.upload.dir.mac}")
+    private String uploadDirMac;
+
+    @Value("${app.base.url}")
+    private String baseUrl;
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@Valid @RequestBody LoginRequest loginRequest, BindingResult bindingResult) {
@@ -120,42 +130,60 @@ public class AuthController {
             return ResponseEntity.badRequest().body("Email already in use");
         }
 
-        // Créer un nouvel utilisateur
-        User user = new User();
-        user.setFirstName(firstName);
-        user.setLastName(lastName);
-        user.setEmail(email);
-        user.setPassword(passwordEncoder.encode(password));
-        user.setAge(age);
-        user.setTrainingLevel(trainingLevel);
-        user.setGender(gender);
-        user.setMainGoal(mainGoal);
-        user.setGoalWeight(goalWeight);
-        user.setHeight(height);
-        user.setWeight(weight);
-        user.setPlace(place);
-
-        user.setRoles(Set.of("USER"));
-
-        // Enregistrer l'image en tant que tableau de bytes
-        if (profilePicture != null && !profilePicture.isEmpty()) {
-            try {
-                user.setProfilePicture(profilePicture.getBytes());
-            } catch (IOException e) {
-                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error saving profile picture");
+        try {
+            // Vérification ou création du répertoire d'upload
+            String uploadDir = getUploadDir();
+            File uploadDirPath = new File(uploadDir);
+            if (!uploadDirPath.exists()) {
+                boolean dirCreated = uploadDirPath.mkdirs();
+                if (!dirCreated) {
+                    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                            .body("Could not create upload directory");
+                }
             }
+
+            String profilePictureUrl = null;
+
+            // Gestion de l'upload de l'image
+            if (profilePicture != null && !profilePicture.isEmpty()) {
+                String fileName = System.currentTimeMillis() + "_" + profilePicture.getOriginalFilename();
+                File file = new File(uploadDirPath, fileName);
+                profilePicture.transferTo(file);
+                profilePictureUrl = baseUrl + "/uploads/" + fileName;
+            }
+            // Créer un nouvel utilisateur
+            User user = new User();
+            user.setFirstName(firstName);
+            user.setLastName(lastName);
+            user.setEmail(email);
+            user.setPassword(passwordEncoder.encode(password));
+            user.setAge(age);
+            user.setTrainingLevel(trainingLevel);
+            user.setGender(gender);
+            user.setMainGoal(mainGoal);
+            user.setGoalWeight(goalWeight);
+            user.setHeight(height);
+            user.setWeight(weight);
+            user.setPlace(place);
+
+            user.setRoles(Set.of("USER"));
+
+            // Sauvegarder l'utilisateur après validation des informations
+            User savedUser = userRepository.save(user);
+
+            UserDTO userDTO = userMapper.userToUserDTO(savedUser);
+
+            // Préparer la réponse avec DTO
+            RegisterResponseDTO registerResponse = new RegisterResponseDTO();
+            registerResponse.setUser(userDTO);
+
+            return ResponseEntity.ok(registerResponse);
+        } catch (IOException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error uploading file: " + e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred: " + e.getMessage());
         }
-
-        // Sauvegarder l'utilisateur après validation des informations
-        User savedUser = userRepository.save(user);
-
-        UserDTO userDTO = userMapper.userToUserDTO(savedUser);
-
-        // Préparer la réponse avec DTO
-        RegisterResponseDTO registerResponse = new RegisterResponseDTO();
-        registerResponse.setUser(userDTO);
-
-        return ResponseEntity.ok(registerResponse);
     }
 
     // Optionnel: Logout Endpoint
@@ -163,5 +191,16 @@ public class AuthController {
     public ResponseEntity<?> logout() {
         // Implémenter la logique de déconnexion si nécessaire
         return ResponseEntity.ok("Logged out successfully");
+    }
+
+    private String getUploadDir() {
+        String os = System.getProperty("os.name").toLowerCase();
+        if (os.contains("mac")) {
+            return uploadDirMac;
+        } else if (os.contains("win")) {
+            return uploadDirWindows;
+        } else {
+            throw new RuntimeException("Unsupported operating system: " + os);
+        }
     }
 }

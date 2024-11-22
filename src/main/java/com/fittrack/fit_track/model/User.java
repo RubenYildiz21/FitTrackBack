@@ -15,7 +15,6 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.Lob;
 import jakarta.persistence.OneToMany;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -46,8 +45,7 @@ public class User {
     @NotBlank
     private String trainingLevel;
 
-    @Lob
-    private byte[] profilePicture;
+    private String profilePicture;
 
     // Questions personnelles
     private String gender; // Men, Woman, Gender neutral
@@ -162,11 +160,11 @@ public class User {
         this.age = age;
     }
 
-    public byte[] getProfilePicture() {
+    public String getProfilePicture() {
         return profilePicture;
     }
 
-    public void setProfilePicture(byte[] profilePicture) {
+    public void setProfilePicture(String profilePicture) {
         this.profilePicture = profilePicture;
     }
 
