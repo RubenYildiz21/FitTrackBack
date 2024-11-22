@@ -16,6 +16,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.fittrack.fit_track.dto.FollowDTO;
+import com.fittrack.fit_track.mapper.FollowMapper;
 import com.fittrack.fit_track.model.Follow;
 import com.fittrack.fit_track.model.User;
 import com.fittrack.fit_track.repository.FollowRepository;
@@ -42,6 +44,7 @@ public class FollowController {
 
         // Vérifier si les utilisateurs existent
         if (userToFollow == null || currentUser == null) {
+            response.put("message", "Utilisateur non trouvé");
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
         }
 
@@ -60,9 +63,10 @@ public class FollowController {
             newFollow.setFollower(currentUser);
 
             Follow savedFollow = followRepository.save(newFollow);
+            FollowDTO followDTO = FollowMapper.INSTANCE.followToFollowDTO(savedFollow);
             response.put("message", "Vous avez commencé à suivre cet utilisateur.");
             response.put("action", "follow");
-            response.put("followData", savedFollow);
+            response.put("followData", followDTO);
         }
 
         return ResponseEntity.ok(response);

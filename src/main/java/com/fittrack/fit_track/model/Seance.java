@@ -9,6 +9,7 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 
 @Entity
@@ -18,6 +19,9 @@ public class Seance {
     private Long idSeance;
     
     private LocalDateTime dateSeance;
+
+    @ManyToOne
+    private User user;
 
     @OneToMany(fetch = FetchType.EAGER, mappedBy = "seance", cascade = CascadeType.ALL)
     private List<Bloc> blocs;
@@ -46,5 +50,13 @@ public class Seance {
 
     public void setBlocs(List<Bloc> blocs) {
         this.blocs = blocs;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
     }
 }

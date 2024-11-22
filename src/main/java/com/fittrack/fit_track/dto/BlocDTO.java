@@ -1,36 +1,19 @@
-package com.fittrack.fit_track.model;
+// src/main/java/com/fittrack/fit_track/dto/BlocDTO.java
+package com.fittrack.fit_track.dto;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-
-@Entity
-public class Bloc {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+public class BlocDTO {
     private Long idBloc;
-    
-    private Integer reps; // Renommé de 'repetition' à 'reps' pour cohérence
+    private Integer reps;
     private Integer serie;
     private String tempsRepos;
     private String tempsDeRepetition;
     private Double poids;
-
     private Double caloriesBurned;
     private Double distance;
+    private ExerciceDTO exercice;
+    private Long seanceId;
 
-    @ManyToOne
-    @JoinColumn(name = "idExercice")
-    private Exercice exercice;
-
-    @ManyToOne
-    @JoinColumn(name = "idSeance")
-    private Seance seance;
-
-    // Getters and Setters
+    // Getters et Setters
 
     public Long getIdBloc() {
         return idBloc;
@@ -43,7 +26,7 @@ public class Bloc {
     public Integer getReps() {
         return reps;
     }
-
+    
     public void setReps(Integer reps) {
         this.reps = reps;
     }
@@ -51,7 +34,7 @@ public class Bloc {
     public Integer getSerie() {
         return serie;
     }
-
+    
     public void setSerie(Integer serie) {
         this.serie = serie;
     }
@@ -59,7 +42,7 @@ public class Bloc {
     public String getTempsRepos() {
         return tempsRepos;
     }
-
+    
     public void setTempsRepos(String tempsRepos) {
         this.tempsRepos = tempsRepos;
     }
@@ -67,7 +50,7 @@ public class Bloc {
     public String getTempsDeRepetition() {
         return tempsDeRepetition;
     }
-
+    
     public void setTempsDeRepetition(String tempsDeRepetition) {
         this.tempsDeRepetition = tempsDeRepetition;
     }
@@ -75,31 +58,15 @@ public class Bloc {
     public Double getPoids() {
         return poids;
     }
-
+    
     public void setPoids(Double poids) {
         this.poids = poids;
-    }
-
-    public Exercice getExercice() {
-        return exercice;
-    }
-
-    public void setExercice(Exercice exercice) {
-        this.exercice = exercice;
-    }
-
-    public Seance getSeance() {
-        return seance;
-    }
-
-    public void setSeance(Seance seance) {
-        this.seance = seance;
     }
 
     public Double getCaloriesBurned() {
         return caloriesBurned;
     }
-
+    
     public void setCaloriesBurned(Double caloriesBurned) {
         this.caloriesBurned = caloriesBurned;
     }
@@ -107,8 +74,24 @@ public class Bloc {
     public Double getDistance() {
         return distance;
     }
-
+    
     public void setDistance(Double distance) {
         this.distance = distance;
+    }
+
+    public ExerciceDTO getExercice() {
+        return exercice;
+    }
+    
+    public void setExercice(ExerciceDTO exercice) {
+        this.exercice = exercice;
+    }
+
+    public Long getSeanceId() {
+        return seanceId;
+    }
+    
+    public void setSeanceId(Long seanceId) {
+        this.seanceId = seanceId;
     }
 }

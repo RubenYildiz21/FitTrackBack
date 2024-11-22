@@ -17,8 +17,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findByEmail(String email);
 
     // Méthode pour rechercher des utilisateurs par prénom ou nom
-    @Query("SELECT u.age, u.email, u.firstName, u.lastName, u.gender, u.goalWeight, u.height, u.id, u.mainGoal, u.place, u.profilePicture, u.roles, u.trainingLevel, u.weight " +
-            "FROM User u " +
+    @Query("SELECT u FROM User u " +
             "WHERE (LOWER(u.firstName) LIKE LOWER(CONCAT('%', :firstName, '%')) AND LOWER(u.lastName) LIKE LOWER(CONCAT('%', :lastName, '%'))) " +
             "OR (LOWER(u.firstName) LIKE LOWER(CONCAT('%', :lastName, '%')) AND LOWER(u.lastName) LIKE LOWER(CONCAT('%', :firstName, '%'))) " +
             "OR LOWER(u.firstName) LIKE LOWER(CONCAT('%', :query, '%')) " +

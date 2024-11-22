@@ -1,8 +1,10 @@
 package com.fittrack.fit_track.controller;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -13,8 +15,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.fittrack.fit_track.model.Exercice;
-import com.fittrack.fit_track.model.Seance;
+import com.fittrack.fit_track.dto.ExerciceDTO;
+import com.fittrack.fit_track.dto.SeanceDTO;
 import com.fittrack.fit_track.model.enums.Equipement;
 import com.fittrack.fit_track.model.enums.PartieCorps;
 import com.fittrack.fit_track.service.SeanceService;
@@ -36,10 +38,10 @@ public class SeanceController {
      * @return ResponseEntity containing the created session or an error message
      */
     @PostMapping
-    public ResponseEntity<?> enregistrerSeance(@Valid @RequestBody Seance seance) {
+    public ResponseEntity<?> enregistrerSeance(@Valid @RequestBody SeanceDTO seanceDTO) {
         try {
-            Seance nouvelleSeance = seanceService.enregistrerSeance(seance);
-            return ResponseEntity.ok(nouvelleSeance);
+            SeanceDTO nouvelleSeanceDTO = seanceService.enregistrerSeance(seanceDTO);
+            return ResponseEntity.ok(nouvelleSeanceDTO);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
@@ -54,9 +56,11 @@ public class SeanceController {
      */
     @GetMapping("/{id}")
     public ResponseEntity<?> getSeance(@PathVariable Long id) {
-        return seanceService.getSeance(id)
-            .map(ResponseEntity::ok)
-            .orElse(ResponseEntity.notFound().build());
+        Optional<SeanceDTO> seanceOpt = seanceService.getSeance(id);
+        if (seanceOpt.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Seance not found");
+        }
+        return ResponseEntity.ok(seanceOpt.get());
     }
 
     /**
@@ -66,14 +70,16 @@ public class SeanceController {
      * @return ResponseEntity contenant les exercices filtrés
      */
     @GetMapping("/exercices")
-    public ResponseEntity<List<Exercice>> filtrerExercices(
+    public ResponseEntity<List<ExerciceDTO>> filtrerExercices(
             @RequestParam(required = false) PartieCorps partieCorps,
             @RequestParam(required = false) Equipement equipement) {
 
         if (partieCorps != null) {
-            return ResponseEntity.ok(seanceService.filtrerExercices(partieCorps));
+            List<ExerciceDTO> exerciceDTOs = seanceService.filtrerExercices(partieCorps);
+            return ResponseEntity.ok(exerciceDTOs);
         } else if (equipement != null) {
-            return ResponseEntity.ok(seanceService.filtrerExercices(equipement));
+            List<ExerciceDTO> exerciceDTOs = seanceService.filtrerExercices(equipement);
+            return ResponseEntity.ok(exerciceDTOs);
         } else {
             return ResponseEntity.badRequest().body(null);
         }

@@ -1,8 +1,6 @@
 package com.fittrack.fit_track.controller;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +10,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -25,12 +24,15 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.fittrack.fit_track.dto.LoginRequest;
+import com.fittrack.fit_track.dto.LoginResponseDTO;
+import com.fittrack.fit_track.dto.RegisterResponseDTO;
+import com.fittrack.fit_track.dto.UserDTO;
+import com.fittrack.fit_track.mapper.UserMapper;
 import com.fittrack.fit_track.model.User;
 import com.fittrack.fit_track.repository.UserRepository;
 import com.fittrack.fit_track.utils.JwtUtils;
 
 import jakarta.validation.Valid;
-
 
 @RestController
 @RequestMapping("/api/auth")
@@ -48,42 +50,51 @@ public class AuthController {
     @Autowired
     private JwtUtils jwtUtils;
 
+    @Autowired
+    private UserMapper userMapper; 
 
+    
     @PostMapping("/login")
     public ResponseEntity<?> login(@Valid @RequestBody LoginRequest loginRequest, BindingResult bindingResult) {
+        System.out.println("Login attempt for email: " + loginRequest.getEmail());
         if (bindingResult.hasErrors()) {
+            System.out.println("Login request has validation errors.");
             return ResponseEntity.badRequest().body(bindingResult.getAllErrors());
         }
 
         try {
             // Authentifier l'user via AuthenticationManager
             Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword())
-                );
+                    new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword()));
 
-            //Définir le contexte de sécurité
+            System.out.println("Authentication successful for email: " + loginRequest.getEmail());
+            // Définir le contexte de sécurité
             SecurityContextHolder.getContext().setAuthentication(authentication);
 
             // Générer le token JWT
             String token = jwtUtils.generateJwtToken(authentication);
+            System.out.println("JWT Token generated: " + token);
 
             // Récupérer les détails de l'utilisateur authentifié
             UserDetails userDetails = (UserDetails) authentication.getPrincipal();
             User user = userRepository.findByEmail(userDetails.getUsername())
-            .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+                    .orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
+            // Mapper l'utilisateur vers UserDTO
+            UserDTO userDTO = userMapper.userToUserDTO(user);
 
-            // Préparer la réponse
-            Map<String, Object> response = new HashMap<>();
-            response.put("token", token);
-            response.put("user", user);
+            // Préparer la réponse avec DTO
+            LoginResponseDTO loginResponse = new LoginResponseDTO();
+            loginResponse.setToken(token);
+            loginResponse.setUser(userDTO);
 
-            return ResponseEntity.ok(response);
+            System.out.println("Login response prepared for email: " + loginRequest.getEmail());
+            return ResponseEntity.ok(loginResponse);
         } catch (BadCredentialsException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid credentials");
-        } catch (UsernameNotFoundException e){
+        } catch (UsernameNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
-        } catch (Exception e) {
+        } catch (AuthenticationException e) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("An unexpected error occurred");
         }
     }
@@ -124,7 +135,6 @@ public class AuthController {
         user.setWeight(weight);
         user.setPlace(place);
 
-
         user.setRoles(Set.of("USER"));
 
         // Enregistrer l'image en tant que tableau de bytes
@@ -138,8 +148,16 @@ public class AuthController {
 
         // Sauvegarder l'utilisateur après validation des informations
         User savedUser = userRepository.save(user);
-        return ResponseEntity.ok(savedUser);
+
+        UserDTO userDTO = UserMapper.INSTANCE.userToUserDTO(savedUser);
+
+        // Préparer la réponse avec DTO
+        RegisterResponseDTO registerResponse = new RegisterResponseDTO();
+        registerResponse.setUser(userDTO);
+
+        return ResponseEntity.ok(registerResponse);
     }
+
     // Optionnel: Logout Endpoint
     @PostMapping("/logout")
     public ResponseEntity<?> logout() {

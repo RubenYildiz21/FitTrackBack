@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -14,6 +16,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.fittrack.fit_track.dto.DefiDTO;
+import com.fittrack.fit_track.mapper.DefiMapper;
 import com.fittrack.fit_track.model.Defi;
 import com.fittrack.fit_track.repository.DefiRepository;
 
@@ -27,42 +31,61 @@ public class DefiController {
     // Obtenir la liste de tous les défis
     @GetMapping
     @PreAuthorize("isAuthenticated()")
-    public List<Defi> getAllDefis() {
-        return defiRepository.findAll();
+    public ResponseEntity<List<DefiDTO>> getAllDefis() {
+        List<Defi> defis = defiRepository.findAll();
+        List<DefiDTO> defiDTOs = defis.stream()
+                                      .map(DefiMapper.INSTANCE::defiToDefiDTO)
+                                      .toList();
+        return ResponseEntity.ok(defiDTOs);
     }
 
     // Obtenir un défi par ID
     @GetMapping("/{id}")
     @PreAuthorize("isAuthenticated()")
-    public Optional<Defi> getDefiById(@PathVariable Long id) {
-        return defiRepository.findById(id);
+    public ResponseEntity<DefiDTO> getDefiById(@PathVariable Long id) {
+        Optional<Defi> defiOpt = defiRepository.findById(id);
+        if (defiOpt.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        }
+        DefiDTO defiDTO = DefiMapper.INSTANCE.defiToDefiDTO(defiOpt.get());
+        return ResponseEntity.ok(defiDTO);
     }
 
     // Créer un nouveau défi
     @PostMapping
     @PreAuthorize("isAuthenticated()")
-    public Defi createDefi(@RequestBody Defi defi) {
-        return defiRepository.save(defi);
+    public ResponseEntity<DefiDTO> createDefi(@RequestBody DefiDTO defiDTO) {
+        Defi defi = DefiMapper.INSTANCE.defiDTOToDefi(defiDTO);
+        Defi savedDefi = defiRepository.save(defi);
+        DefiDTO savedDefiDTO = DefiMapper.INSTANCE.defiToDefiDTO(savedDefi);
+        return new ResponseEntity<>(savedDefiDTO, HttpStatus.CREATED);
     }
 
     // Mettre à jour un défi
     @PutMapping("/{id}")
     @PreAuthorize("isAuthenticated()")
-    public Defi updateDefi(@PathVariable Long id, @RequestBody Defi defiDetails) {
-        Defi defi = defiRepository.findById(id).orElseThrow(() -> new RuntimeException("Defi not found"));
+    public ResponseEntity<DefiDTO> updateDefi(@PathVariable Long id, @RequestBody DefiDTO defiDTO) {
+        Optional<Defi> defiOpt = defiRepository.findById(id);
+        if (defiOpt.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        }
 
-        defi.setObjectif(defiDetails.getObjectif());
-        defi.setCreateur(defiDetails.getCreateur());
-        defi.setParticipants(defiDetails.getParticipants());
-
-        return defiRepository.save(defi);
+        Defi defi = DefiMapper.INSTANCE.defiDTOToDefi(defiDTO);
+        defi.setIdDefi(id); // Assurez-vous de définir l'ID
+        Defi updatedDefi = defiRepository.save(defi);
+        DefiDTO updatedDefiDTO = DefiMapper.INSTANCE.defiToDefiDTO(updatedDefi);
+        return ResponseEntity.ok(updatedDefiDTO);
     }
 
     // Supprimer un défi par ID
     @DeleteMapping("/{id}")
     @PreAuthorize("isAuthenticated()")
-    public void deleteDefi(@PathVariable Long id) {
-        Defi defi = defiRepository.findById(id).orElseThrow(() -> new RuntimeException("Defi not found"));
-        defiRepository.delete(defi);
+    public ResponseEntity<Void> deleteDefi(@PathVariable Long id) {
+        Optional<Defi> defiOpt = defiRepository.findById(id);
+        if (defiOpt.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+        defiRepository.delete(defiOpt.get());
+        return ResponseEntity.noContent().build();
     }
 }

@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.fittrack.fit_track.model.Exercice;
+import com.fittrack.fit_track.dto.ExerciceDTO;
 import com.fittrack.fit_track.service.ExerciceService;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -36,9 +36,9 @@ public class ExerciceController {
         @ApiResponse(responseCode = "500", description = "Erreur serveur interne")
     })
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<List<Exercice>> getAllExercices() {
+    public ResponseEntity<List<ExerciceDTO>> getAllExercices() {
         try {
-            List<Exercice> exercices = exerciceService.getAllExercices();
+            List<ExerciceDTO> exercices = exerciceService.getAllExercices();
             return ResponseEntity.ok(exercices);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
@@ -53,12 +53,12 @@ public class ExerciceController {
         @ApiResponse(responseCode = "500", description = "Erreur serveur interne")
     })
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<Exercice> getExerciceById(@PathVariable Long id) {
+    public ResponseEntity<ExerciceDTO> getExerciceById(@PathVariable Long id) {
         try {
-            Exercice exercice = exerciceService.getExerciceById(id);
-            return ResponseEntity.ok(exercice);
+            ExerciceDTO exerciceDTO = exerciceService.getExerciceById(id);
+            return ResponseEntity.ok(exerciceDTO);
         } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }

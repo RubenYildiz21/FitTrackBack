@@ -27,41 +27,44 @@ import com.fittrack.fit_track.service.CustomUserDetailsService;
 @EnableMethodSecurity(prePostEnabled = true)
 public class SecurityConfig {
 
-    private final CustomUserDetailsService userDetailsService;
-
     @Autowired
     private JwtTokenFilter jwtTokenFilter;
 
     public SecurityConfig(CustomUserDetailsService userDetailsService) {
-        this.userDetailsService = userDetailsService;
     }
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-            // Configuration CORS
-            .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-            
-            // Désactiver CSRF
-            .csrf(csrf -> csrf.disable())
-            
-            // Gestion des sessions sans état (JWT)
-            .sessionManagement(session -> session
-                .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-            
-            // Autorisation des requêtes
-            .authorizeHttpRequests(auth -> auth
-                // Endpoints publics
-                .requestMatchers("/api/auth/login", "/api/auth/register", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
-                
-                // Tous les autres endpoints nécessitent une authentification
-                .anyRequest().authenticated())
-            
-            // Ajouter le filtre JWT avant le filtre d'authentification classique
-            .addFilterBefore(jwtTokenFilter, UsernamePasswordAuthenticationFilter.class);
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
 
+
+                .csrf(csrf -> csrf.disable())
+
+                // Gestion des sessions sans état (JWT)
+                .sessionManagement(session -> session
+                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+
+                // Autorisation des requêtes
+                .authorizeHttpRequests(auth -> auth
+                        // Endpoints publics
+                        .requestMatchers(
+                                "/api/auth/**",
+                                "/swagger-ui/**",
+                                "/v3/api-docs/**",
+                                "/swagger-ui.html")
+                        .permitAll()
+
+                        // Tous les autres endpoints nécessitent une authentification
+                        .anyRequest().authenticated())
+
+                // Ajouter le filtre JWT avant le filtre d'authentification classique
+                .addFilterBefore(jwtTokenFilter, UsernamePasswordAuthenticationFilter.class);
+
+                System.out.println("SecurityFilterChain configured successfully.");
         return http.build();
     }
+
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -73,18 +76,33 @@ public class SecurityConfig {
         return authConfig.getAuthenticationManager();
     }
 
+
+    /**
+     * Configuration CORS pour autoriser toutes les origines, méthodes et en-têtes.
+     */
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        // Remplacez "http://localhost:3000" par l'URL de votre frontend en production
-        configuration.setAllowedOrigins(Arrays.asList("http://localhost:3000"));
+        
+        // Autoriser toutes les origines
+        configuration.setAllowedOriginPatterns(Arrays.asList("http://localhost:3000"));
+        
+        // Autoriser toutes les méthodes HTTP
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-        configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type"));
-        configuration.setExposedHeaders(Arrays.asList("Authorization"));
+        
+        // Autoriser tous les en-têtes
+        configuration.setAllowedHeaders(Arrays.asList("*"));
+        
+        // Autoriser les informations d'identification (cookies, headers d'autorisation)
         configuration.setAllowCredentials(true);
-
+        
+        // Exposer certains headers si nécessaire
+        configuration.setExposedHeaders(Arrays.asList("Authorization", "Content-Type"));
+        
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        // Appliquer la configuration à tous les endpoints
         source.registerCorsConfiguration("/**", configuration);
         return source;
     }
+
 }

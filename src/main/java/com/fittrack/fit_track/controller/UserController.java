@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -13,6 +14,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.fittrack.fit_track.dto.UserDTO;
+import com.fittrack.fit_track.mapper.UserMapper;
 import com.fittrack.fit_track.model.User;
 import com.fittrack.fit_track.repository.UserRepository;
 
@@ -30,66 +33,71 @@ public class UserController {
         Optional<User> userOpt = userRepository.findById(id);
 
         if (userOpt.isEmpty()) {
-            return ResponseEntity.badRequest().body("User not found");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
         }
 
-        User user = userOpt.get();
-        return ResponseEntity.ok(user);
+        UserDTO userDTO = UserMapper.INSTANCE.userToUserDTO(userOpt.get());
+        return ResponseEntity.ok(userDTO);
     }
 
     // Questions personnelles après inscription
     @PutMapping("/{id}")
-    public ResponseEntity<?> setPersonalInformations(@PathVariable Long id, @RequestBody User userDetails) {
+    public ResponseEntity<?> setPersonalInformations(@PathVariable Long id, @RequestBody UserDTO userDetailsDTO) {
         Optional<User> userOpt = userRepository.findById(id);
 
         if (userOpt.isEmpty()) {
-            return ResponseEntity.badRequest().body("User not found");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
         }
 
         // Récuperation de l'utilisateur 
         User user = userOpt.get();
 
         // Mettre à jour les données personnelles 
-        user.setFirstName(userDetails.getFirstName());
-        user.setLastName(userDetails.getLastName());
-        user.setHeight(userDetails.getHeight());
-        user.setWeight(userDetails.getWeight());
+        user.setFirstName(userDetailsDTO.getFirstName());
+        user.setLastName(userDetailsDTO.getLastName());
+        user.setHeight(userDetailsDTO.getHeight());
+        user.setWeight(userDetailsDTO.getWeight());
 
         User updatedUser = userRepository.save(user);
-        return ResponseEntity.ok(updatedUser);
+        UserDTO updatedUserDTO = UserMapper.INSTANCE.userToUserDTO(updatedUser);
+        return ResponseEntity.ok(updatedUserDTO);
     }
 
     @PutMapping("/{id}/goals")
-    public ResponseEntity<?> setPersonalObjectives(@PathVariable Long id, @RequestBody User userDetails) {
+    public ResponseEntity<?> setPersonalObjectives(@PathVariable Long id, @RequestBody UserDTO userDetailsDTO) {
         Optional<User> userOpt = userRepository.findById(id);
 
         if (userOpt.isEmpty()) {
-            return ResponseEntity.badRequest().body("User not found");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
         }
 
         // Récuperation de l'utilisateur 
         User user = userOpt.get();
 
         // Mettre à jour les données personnelles 
-        user.setMainGoal(userDetails.getMainGoal());
-        user.setGoalWeight(userDetails.getGoalWeight());
-        user.setHeight(userDetails.getHeight());
-        user.setWeight(userDetails.getWeight());
+        user.setMainGoal(userDetailsDTO.getMainGoal());
+        user.setGoalWeight(userDetailsDTO.getGoalWeight());
+        user.setHeight(userDetailsDTO.getHeight());
+        user.setWeight(userDetailsDTO.getWeight());
 
         User updatedUser = userRepository.save(user);
-        return ResponseEntity.ok(updatedUser);
+        UserDTO updatedUserDTO = UserMapper.INSTANCE.userToUserDTO(updatedUser);
+        return ResponseEntity.ok(updatedUserDTO);
     }
 
     // Récupérer la liste des utilisateurs
     @GetMapping("/all")
-    public ResponseEntity<List<User>> getAllUsers() {
+    public ResponseEntity<List<UserDTO>> getAllUsers() {
         List<User> users = userRepository.findAll();
-        return ResponseEntity.ok(users);
+        List<UserDTO> userDTOs = users.stream()
+                                      .map(UserMapper.INSTANCE::userToUserDTO)
+                                      .toList();
+        return ResponseEntity.ok(userDTOs);
     }
 
     // Récupérer la liste des utilisateurs apres une recherche
     @GetMapping("/search")
-    public ResponseEntity<List<User>> searchUsers(@RequestParam("query") String searchTerm) {
+    public ResponseEntity<List<UserDTO>> searchUsers(@RequestParam("query") String searchTerm) {
         String firstName = searchTerm;
         String lastName = searchTerm;
 
@@ -101,6 +109,9 @@ public class UserController {
         }
 
         List<User> users = userRepository.findWithSearch(firstName, lastName, searchTerm);
-        return ResponseEntity.ok(users);
+        List<UserDTO> userDTOs = users.stream()
+                                      .map(UserMapper.INSTANCE::userToUserDTO)
+                                      .toList();
+        return ResponseEntity.ok(userDTOs);
     }
 }
