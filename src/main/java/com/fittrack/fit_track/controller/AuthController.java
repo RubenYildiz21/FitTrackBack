@@ -1,6 +1,5 @@
 package com.fittrack.fit_track.controller;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.Set;
 
@@ -32,6 +31,7 @@ import com.fittrack.fit_track.dto.UserDTO;
 import com.fittrack.fit_track.mapper.UserMapper;
 import com.fittrack.fit_track.model.User;
 import com.fittrack.fit_track.repository.UserRepository;
+import com.fittrack.fit_track.service.CloudinaryService;
 import com.fittrack.fit_track.utils.JwtUtils;
 
 import jakarta.validation.Valid;
@@ -51,6 +51,9 @@ public class AuthController {
 
     @Autowired
     private JwtUtils jwtUtils;
+
+    @Autowired
+    private CloudinaryService cloudinaryService;
 
     @Autowired
     private UserMapper userMapper;
@@ -131,25 +134,12 @@ public class AuthController {
         }
 
         try {
-            // Vérification ou création du répertoire d'upload
-            String uploadDir = getUploadDir();
-            File uploadDirPath = new File(uploadDir);
-            if (!uploadDirPath.exists()) {
-                boolean dirCreated = uploadDirPath.mkdirs();
-                if (!dirCreated) {
-                    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                            .body("Could not create upload directory");
-                }
-            }
 
             String profilePictureUrl = null;
 
-            // Gestion de l'upload de l'image
-            if (profilePicture != null && !profilePicture.isEmpty()) {
-                String fileName = System.currentTimeMillis() + "_" + profilePicture.getOriginalFilename();
-                File file = new File(uploadDirPath, fileName);
-                profilePicture.transferTo(file);
-                profilePictureUrl = baseUrl + "/uploads/" + fileName;
+            if(profilePicture != null && !profilePicture.isEmpty()) {
+                profilePictureUrl = cloudinaryService.uploadImage(profilePicture);
+                System.out.println("Image uploaded to Cloudinary: " + profilePictureUrl);
             }
             // Créer un nouvel utilisateur
             User user = new User();
@@ -165,6 +155,7 @@ public class AuthController {
             user.setHeight(height);
             user.setWeight(weight);
             user.setPlace(place);
+            user.setProfilePicture(profilePictureUrl);
 
             user.setRoles(Set.of("USER"));
 
