@@ -10,6 +10,7 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.validation.constraints.NotNull;
 
 @Entity
 public class Exercice {
@@ -28,6 +29,7 @@ public class Exercice {
     @Enumerated(EnumType.STRING)
     private Equipement equipementNecessaire;
 
+    @NotNull
     @Enumerated(EnumType.STRING)
     private ExerciseType type;
 

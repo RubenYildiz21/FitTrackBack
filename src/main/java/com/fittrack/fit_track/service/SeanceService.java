@@ -132,9 +132,12 @@ public class SeanceService {
     private void computeStats(Series series, Bloc bloc){
         Exercice exercice = bloc.getExercice();
         ExerciseType type = exercice.getType();
+
+        if (type == null) {
+            throw new IllegalArgumentException("Exercise type is null for exercise ID " + exercice.getIdExercice());
+        }
+
         double weight = series.getPoids();
-        int reps = series.getReps();
-        int serie = series.getSerie();
 
         double durationHours = calculateDuration(series); // Calculer la durée en heures
 
@@ -164,6 +167,7 @@ public class SeanceService {
                 distance = avgSpeed * durationHours;
             }
             default -> {
+                
                 // Autres types d'exercices peuvent être traités ici
             }
         }

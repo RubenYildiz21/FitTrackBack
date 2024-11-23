@@ -39,6 +39,7 @@ public class SeanceController {
      */
     @PostMapping
     public ResponseEntity<?> enregistrerSeance(@Valid @RequestBody SeanceDTO seanceDTO) {
+        System.out.println("Received SeanceDTO: " + seanceDTO);
         try {
             SeanceDTO nouvelleSeanceDTO = seanceService.enregistrerSeance(seanceDTO);
             return ResponseEntity.ok(nouvelleSeanceDTO);
@@ -46,7 +47,6 @@ public class SeanceController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
-
 
     /**
      * Retrieves a workout session by its ID.
@@ -84,4 +84,4 @@ public class SeanceController {
             return ResponseEntity.badRequest().body(null);
         }
     }
-} 
+}

@@ -29,6 +29,8 @@ public class UserController {
 
     @Autowired
     private UserMapper userMapper;
+
+    
     // Récupérer les informations d'un utilisateur par ID
     @GetMapping("/{id}")
     public ResponseEntity<?> getUserById(@PathVariable Long id) {
