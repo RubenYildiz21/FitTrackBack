@@ -24,12 +24,12 @@ public class Commentaire {
     private Date dateCommentaire = new Date();
     
     @ManyToOne
-    @JoinColumn(name = "idPost")
+    @JoinColumn(name = "idPost", nullable = false)
     private Post post;
     
     // Ajout du champ user pour la relation avec User
     @ManyToOne
-    @JoinColumn(name = "idUser")
+    @JoinColumn(name = "idUser", nullable = false)
     private User user;  // Utilisateur qui a fait le commentaire
 
     // Getters et setters

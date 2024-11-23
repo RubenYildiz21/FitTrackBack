@@ -1,19 +1,17 @@
 package com.fittrack.fit_track.controller;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
+import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import com.fittrack.fit_track.dto.PostDTO;
 import com.fittrack.fit_track.dto.UserDTO;
@@ -22,6 +20,7 @@ import com.fittrack.fit_track.mapper.UserMapper;
 import com.fittrack.fit_track.model.Post;
 import com.fittrack.fit_track.service.PostService;
 import com.fittrack.fit_track.service.UserService;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping("/api/posts")
@@ -43,6 +42,7 @@ public class PostController {
             List<PostDTO> postDTOs = postService.getAllPosts();
             return ResponseEntity.ok(postDTOs);
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
@@ -56,6 +56,7 @@ public class PostController {
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
@@ -91,6 +92,7 @@ public class PostController {
             PostDTO updatedPostDTO = postService.updatePost(id, postDTO);
             return ResponseEntity.ok(updatedPostDTO);
         } catch (RuntimeException e) {
+            e.printStackTrace();
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         }
     }
@@ -102,7 +104,9 @@ public class PostController {
             postService.deletePost(id);
             return ResponseEntity.noContent().build();
         } catch (RuntimeException e) {
+            e.printStackTrace();
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
     }
+
 }

@@ -11,9 +11,27 @@ public class PostDTO {
     private Long userId;
     private String userFirstName;
     private String userLastName;
-    private List<CommentaireDTO> commentaires;
+
+    private String photoUrl;
+
+    private String userProfilePicture;
+
+    public String getUserProfilePicture() {
+        return userProfilePicture;
+    }
+
+    public void setUserProfilePicture(String userProfilePicture) {
+        this.userProfilePicture = userProfilePicture;
+    }
 
     // Getters et Setters
+    public String getPhotoUrl() {
+        return photoUrl;
+    }
+
+    public void setPhotoUrl(String photoUrl) {
+        this.photoUrl = photoUrl;
+    }
 
     public Long getIdPost() {
         return idPost;
@@ -63,11 +81,5 @@ public class PostDTO {
         this.userLastName = userLastName;
     }
 
-    public List<CommentaireDTO> getCommentaires() {
-        return commentaires;
-    }
-    
-    public void setCommentaires(List<CommentaireDTO> commentaires) {
-        this.commentaires = commentaires;
-    }
+
 }

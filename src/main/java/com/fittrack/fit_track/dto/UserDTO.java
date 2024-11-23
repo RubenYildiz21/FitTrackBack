@@ -17,6 +17,7 @@ public class UserDTO {
     private int weight;
     private String place;
     private Set<String> roles;
+    private String profilePicture;
 
     // Getters et Setters
 
@@ -122,5 +123,13 @@ public class UserDTO {
     
     public void setRoles(Set<String> roles) {
         this.roles = roles;
+    }
+
+    public String getProfilePicture() {
+        return profilePicture;
+    }
+    
+    public void setProfilePicture(String profilePicture) {
+        this.profilePicture = profilePicture;
     }
 }

@@ -19,9 +19,14 @@ public class PostService {
 
     public List<PostDTO> getAllPosts() {
         List<Post> posts = postRepository.findAll();
+        System.out.println("Nombre de posts trouvés : " + posts.size());
         return posts.stream()
-                    .map(PostMapper.INSTANCE::postToPostDTO)
-                    .toList();
+                .map(post -> {
+                    PostDTO dto = PostMapper.INSTANCE.postToPostDTO(post);
+                    System.out.println("Post ID: " + dto.getIdPost() + ", Utilisateur: " + dto.getUserFirstName());
+                    return dto;
+                })
+                .toList();
     }
     
     public PostDTO getPostById(Long id) {
