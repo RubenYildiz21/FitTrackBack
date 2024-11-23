@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import com.fittrack.fit_track.dto.ProgressDTO;
 import com.fittrack.fit_track.model.Bloc;
 import com.fittrack.fit_track.model.Seance;
+import com.fittrack.fit_track.model.Series;
 import com.fittrack.fit_track.repository.SeanceRepository;
 
 @Service
@@ -49,18 +50,22 @@ public class ProgressService {
 
         for (Seance seance : seances) {
             String key = getPeriodKey(seance.getDateSeance(), period);
-            
+
             for (Bloc bloc : seance.getBlocs()) {
-                // Calculer les répétitions totales
-                repsPerPeriod.put(key, repsPerPeriod.getOrDefault(key, 0) + bloc.getReps());
+                if (bloc.getSeries() != null) {
+                    for (Series series : bloc.getSeries()) {
+                        // Calculer les répétitions totales
+                        repsPerPeriod.put(key, repsPerPeriod.getOrDefault(key, 0) + series.getReps());
 
-                // Calculer les calories brûlées
-                Double calories = bloc.getCaloriesBurned() != null ? bloc.getCaloriesBurned() : 0.0;
-                caloriesPerPeriod.put(key, caloriesPerPeriod.getOrDefault(key, 0.0) + calories);
+                        // Calculer les calories brûlées
+                        Double calories = series.getCaloriesBurned() != null ? series.getCaloriesBurned() : 0.0;
+                        caloriesPerPeriod.put(key, caloriesPerPeriod.getOrDefault(key, 0.0) + calories);
 
-                // Calculer la distance parcourue
-                Double distance = bloc.getDistance() != null ? bloc.getDistance() : 0.0;
-                distancePerPeriod.put(key, distancePerPeriod.getOrDefault(key, 0.0) + distance);
+                        // Calculer la distance parcourue
+                        Double distance = series.getDistance() != null ? series.getDistance() : 0.0;
+                        distancePerPeriod.put(key, distancePerPeriod.getOrDefault(key, 0.0) + distance);
+                    }
+                }
             }
         }
 

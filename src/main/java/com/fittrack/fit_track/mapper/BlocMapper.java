@@ -7,7 +7,7 @@ import org.mapstruct.factory.Mappers;
 import com.fittrack.fit_track.dto.BlocDTO;
 import com.fittrack.fit_track.model.Bloc;
 
-@Mapper
+@Mapper(uses= {SeriesMapper.class})
 public interface BlocMapper {
     BlocMapper INSTANCE = Mappers.getMapper(BlocMapper.class);
     
