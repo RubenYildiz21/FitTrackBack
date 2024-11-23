@@ -1,26 +1,21 @@
 package com.fittrack.fit_track.model;
 
+import java.util.List;
+
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 
 @Entity
 public class Bloc {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long idBloc;
-    
-    private Integer reps; // Renommé de 'repetition' à 'reps' pour cohérence
-    private Integer serie;
-    private String tempsRepos;
-    private String tempsDeRepetition;
-    private Double poids;
-
-    private Double caloriesBurned;
-    private Double distance;
 
     @ManyToOne
     @JoinColumn(name = "idExercice")
@@ -30,6 +25,12 @@ public class Bloc {
     @JoinColumn(name = "idSeance")
     private Seance seance;
 
+    @OneToMany(mappedBy = "bloc", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Series> series;
+
+
+    private Double caloriesBurned;
+    private Double distance;
     // Getters and Setters
 
     public Long getIdBloc() {
@@ -38,46 +39,6 @@ public class Bloc {
 
     public void setIdBloc(Long idBloc) {
         this.idBloc = idBloc;
-    }
-
-    public Integer getReps() {
-        return reps;
-    }
-
-    public void setReps(Integer reps) {
-        this.reps = reps;
-    }
-
-    public Integer getSerie() {
-        return serie;
-    }
-
-    public void setSerie(Integer serie) {
-        this.serie = serie;
-    }
-
-    public String getTempsRepos() {
-        return tempsRepos;
-    }
-
-    public void setTempsRepos(String tempsRepos) {
-        this.tempsRepos = tempsRepos;
-    }
-
-    public String getTempsDeRepetition() {
-        return tempsDeRepetition;
-    }
-
-    public void setTempsDeRepetition(String tempsDeRepetition) {
-        this.tempsDeRepetition = tempsDeRepetition;
-    }
-
-    public Double getPoids() {
-        return poids;
-    }
-
-    public void setPoids(Double poids) {
-        this.poids = poids;
     }
 
     public Exercice getExercice() {
@@ -110,5 +71,13 @@ public class Bloc {
 
     public void setDistance(Double distance) {
         this.distance = distance;
+    }
+
+    public List<Series> getSeries() {
+        return series;
+    }
+
+    public void setSeries(List<Series> series) {
+        this.series = series;
     }
 }

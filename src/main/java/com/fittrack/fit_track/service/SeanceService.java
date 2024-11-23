@@ -17,6 +17,7 @@ import com.fittrack.fit_track.mapper.SeanceMapper;
 import com.fittrack.fit_track.model.Bloc;
 import com.fittrack.fit_track.model.Exercice;
 import com.fittrack.fit_track.model.Seance;
+import com.fittrack.fit_track.model.Series;
 import com.fittrack.fit_track.model.enums.Equipement;
 import com.fittrack.fit_track.model.enums.ExerciseType;
 import com.fittrack.fit_track.model.enums.PartieCorps;
@@ -63,17 +64,8 @@ public class SeanceService {
 
     // Valider un bloc
     private void validerBloc(Bloc bloc) {
-        if (bloc.getReps() == null || bloc.getReps() <= 0) {
-            throw new IllegalArgumentException("Le nombre de répétitions doit être supérieur à 0");
-        }
-        if (bloc.getSerie() == null || bloc.getSerie() <= 0) {
-            throw new IllegalArgumentException("Le nombre de séries doit être supérieur à 0");
-        }
-        if (bloc.getPoids() == null || bloc.getPoids() < 0) {
-            throw new IllegalArgumentException("Le poids ne peut pas être négatif");
-        }
-        if (bloc.getExercice() == null) {
-            throw new IllegalArgumentException("Un exercice est requis pour chaque bloc");
+        if(bloc.getExercice() == null) {
+            throw new IllegalArgumentException("Un bloc doit contenir un exercice");
         }
         
         // Vérifier que l'exercice existe
@@ -81,9 +73,16 @@ public class SeanceService {
             .orElseThrow(() -> new IllegalArgumentException("L'exercice spécifié n'existe pas"));
         
         bloc.setExercice(exercice);
-        // Validation du format des temps
-        validateTimeFormat(bloc.getTempsRepos(), "temps de repos");
-        validateTimeFormat(bloc.getTempsDeRepetition(), "temps de répétition");
+
+        // Validation et calcul des series
+        if(bloc.getSeries() == null || bloc.getSeries().isEmpty()) {
+            throw new IllegalArgumentException("Un bloc doit contenir au moins une série");
+        }
+
+        for(Series series : bloc.getSeries()) {
+            validerSerie(series);
+            computeStats(series, bloc);
+        }
     }
 
     // Valider le format des temps
@@ -100,15 +99,44 @@ public class SeanceService {
         }
     }
 
-    // Calculer les statistiques pour un bloc
+
+    private void validerSerie(Series series) {
+        if (series.getReps() == null || series.getReps() <= 0) {
+            throw new IllegalArgumentException("Le nombre de répétitions doit être supérieur à 0");
+        }
+        if (series.getSerie() == null || series.getSerie() <= 0) {
+            throw new IllegalArgumentException("Le numéro de série doit être supérieur à 0");
+        }
+        if (series.getPoids() == null || series.getPoids() < 0) {
+            throw new IllegalArgumentException("Le poids ne peut pas être négatif");
+        }
+        // Validation du format des temps
+        validateTimeFormat(series.getTempsRepos(), "temps de repos");
+        validateTimeFormat(series.getTempsDeRepetition(), "temps de répétition");
+    }
+
     private void computeStats(Bloc bloc){
+        double totalCaloriesBurned = 0.0;
+        double totalDistance = 0.0;
+
+        for (Series series : bloc.getSeries()) {
+            computeStats(series, bloc);
+            totalCaloriesBurned += series.getCaloriesBurned();
+            totalDistance += series.getDistance();
+        }
+
+        bloc.setCaloriesBurned(totalCaloriesBurned);
+        bloc.setDistance(totalDistance);
+    }
+    // Calculer les statistiques pour un bloc
+    private void computeStats(Series series, Bloc bloc){
         Exercice exercice = bloc.getExercice();
         ExerciseType type = exercice.getType();
-        double weight = bloc.getPoids();
-        int reps = bloc.getReps();
-        int serie = bloc.getSerie();
+        double weight = series.getPoids();
+        int reps = series.getReps();
+        int serie = series.getSerie();
 
-        double durationHours = calculateDuration(bloc); // Calculer la durée en heures
+        double durationHours = calculateDuration(series); // Calculer la durée en heures
 
         double caloriesBurned = 0.0;
         double distance = 0.0;
@@ -146,10 +174,10 @@ public class SeanceService {
     }
 
     // Calculer la durée totale en heures basée sur les séries, temps de répétition et temps de repos
-    private double calculateDuration(Bloc bloc) {
-        int serie = bloc.getSerie();
-        String tempsDeRepetition = bloc.getTempsDeRepetition(); // "HH:mm:ss"
-        String tempsRepos = bloc.getTempsRepos(); // "HH:mm:ss"
+    private double calculateDuration(Series series) {
+        int serie = series.getSerie();
+        String tempsDeRepetition = series.getTempsDeRepetition(); // "HH:mm:ss"
+        String tempsRepos = series.getTempsRepos(); // "HH:mm:ss"
 
         // Convertir les temps en secondes
         long repetitionSeconds = parseTimeToSeconds(tempsDeRepetition);
