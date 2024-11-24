@@ -2,9 +2,13 @@ package com.fittrack.fit_track.dto;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class LoginRequest {
 
     @NotBlank(message = "Email is mandatory")
@@ -13,11 +17,4 @@ public class LoginRequest {
     
     @NotBlank(message = "Password is mandatory")
     private String password;
-
-    // Constructors
-    public LoginRequest() {}
-    public LoginRequest(String email, String password) {
-        this.email = email;
-        this.password = password;
-    }
 }
