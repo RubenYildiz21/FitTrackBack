@@ -3,9 +3,13 @@ package com.fittrack.fit_track.dto;
 
 import java.util.List;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class DefiDTO {
     private Long idDefi;
     private String objectif;
