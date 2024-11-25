@@ -19,6 +19,9 @@ public class Post {
 
     private String imageUrl;
 
+    private int nombreLikes = 0;
+
+
     // Relations
     @ManyToOne
     @JoinColumn(name = "idUser", nullable = false)
@@ -27,6 +30,16 @@ public class Post {
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Commentaire> commentaires;
 
+
+
+    // Getters et setters 
+    public int getNombreLikes() {
+        return nombreLikes;
+    }
+
+    public void setNombreLikes(int nombreLikes) {
+        this.nombreLikes = nombreLikes;
+    }
 
     public List<Commentaire> getCommentaires() {
         return commentaires;
@@ -53,7 +66,6 @@ public class Post {
         this.contenu = contenu;
     }
 
-    // Getters et setters pour les autres attributs et relations
     public Long getIdPost() {
         return idPost;
     }

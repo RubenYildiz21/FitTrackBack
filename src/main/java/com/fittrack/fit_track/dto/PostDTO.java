@@ -16,4 +16,5 @@ public class PostDTO {
     private String userFirstName;
     private String userLastName;
     private String userProfilePicture;
+    private int nombreLikes;
 }

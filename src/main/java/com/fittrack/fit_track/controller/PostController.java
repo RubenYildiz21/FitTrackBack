@@ -97,4 +97,34 @@ public class PostController {
         }
     }
 
+    @PostMapping("/{id}/like")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<PostDTO> likePost(@PathVariable Long id, @RequestParam Long userId) {
+        try {
+            PostDTO updatedPost = postService.likePost(id, userId);
+            return ResponseEntity.ok(updatedPost);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
+    @DeleteMapping("/{id}/like")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<PostDTO> unlikePost(@PathVariable Long id, @RequestParam Long userId) {
+        try {
+            PostDTO updatedPost = postService.unlikePost(id, userId);
+            return ResponseEntity.ok(updatedPost);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
+    @GetMapping("/{id}/hasLiked")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<Boolean> hasUserLikedPost(@PathVariable Long id, @RequestParam Long userId) {
+        boolean hasLiked = postService.hasUserLikedPost(id, userId);
+        return ResponseEntity.ok(hasLiked);
+    }
+
+
 }
