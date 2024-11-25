@@ -1,6 +1,7 @@
 package com.fittrack.fit_track.model;
 
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
@@ -26,7 +27,7 @@ public class Bloc {
     private Seance seance;
 
     @OneToMany(mappedBy = "bloc", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Series> series;
+    private Set<Series> series = new HashSet<>();
 
 
     private Double caloriesBurned;
@@ -73,11 +74,11 @@ public class Bloc {
         this.distance = distance;
     }
 
-    public List<Series> getSeries() {
+    public Set<Series> getSeries() {
         return series;
     }
 
-    public void setSeries(List<Series> series) {
+    public void setSeries(Set<Series> series) {
         this.series = series;
     }
 }

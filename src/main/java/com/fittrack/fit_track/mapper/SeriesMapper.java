@@ -13,5 +13,7 @@ public interface SeriesMapper {
     SeriesMapper INSTANCE = Mappers.getMapper(SeriesMapper.class);
     
     SeriesDTO seriesToSeriesDTO(Series series);
+
+    @Mapping(target = "bloc", ignore = true)
     Series seriesDTOToSeries(SeriesDTO seriesDTO);
 }

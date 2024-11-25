@@ -16,4 +16,5 @@ public class SeanceDTO {
     private LocalDateTime dateSeance;
     private Long userId;
     private List<BlocDTO> blocs;
+    private String nameSeance;
 }

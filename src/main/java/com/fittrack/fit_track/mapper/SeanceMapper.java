@@ -14,6 +14,6 @@ public interface SeanceMapper {
     @Mapping(source = "user.id", target = "userId")
     SeanceDTO seanceToSeanceDTO(Seance seance);
     
-    @Mapping(source = "userId", target = "user.id")
+    @Mapping(target = "user", ignore = true)
     Seance seanceDTOToSeance(SeanceDTO seanceDTO);
 }
