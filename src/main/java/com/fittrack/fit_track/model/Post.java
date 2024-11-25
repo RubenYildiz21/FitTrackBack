@@ -1,5 +1,6 @@
 package com.fittrack.fit_track.model;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -16,17 +17,33 @@ public class Post {
     @Temporal(TemporalType.TIMESTAMP)
     private Date dateCreation = new Date();
 
-    // Relations
-    @OneToMany(mappedBy = "post" ,cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Commentaire> commentaires;
+    private String imageUrl;
 
+    // Relations
     @ManyToOne
     @JoinColumn(name = "idUser", nullable = false)
     private User user;
 
-    // Getters and Setters
-    
-    // Getter pour contenu
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<Commentaire> commentaires;
+
+
+    public List<Commentaire> getCommentaires() {
+        return commentaires;
+    }
+
+    public void setCommentaires(List<Commentaire> commentaires) {
+        this.commentaires = commentaires;
+    }
+
+    public String getImageUrl() {
+        return imageUrl;
+    }
+
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
+    }
+
     public String getContenu() {
         return contenu;
     }
@@ -53,13 +70,6 @@ public class Post {
         this.dateCreation = dateCreation;
     }
 
-    public List<Commentaire> getCommentaires() {
-        return commentaires;
-    }
-
-    public void setCommentaires(List<Commentaire> commentaires) {
-        this.commentaires = commentaires;
-    }
 
     public User getUser() {
         return user;

@@ -10,9 +10,10 @@ import lombok.Data;
 public class PostDTO {
     private Long idPost;
     private String contenu;
+    private String imageUrl;
     private Date dateCreation;
     private Long userId;
     private String userFirstName;
     private String userLastName;
-    private List<CommentaireDTO> commentaires;
+    private String userProfilePicture;
 }

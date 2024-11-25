@@ -1,6 +1,7 @@
 package com.fittrack.fit_track.service;
 
 import java.util.List;
+import  java.util.Date;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -18,12 +19,14 @@ public class PostService {
     private PostRepository postRepository;
 
     public List<PostDTO> getAllPosts() {
-        List<Post> posts = postRepository.findAll();
+        List<Post> posts = postRepository.findAllByOrderByDateCreationDesc(); // Récupère les posts par date décroissante
         System.out.println("Nombre de posts trouvés : " + posts.size());
         return posts.stream()
                 .map(post -> {
                     PostDTO dto = PostMapper.INSTANCE.postToPostDTO(post);
-                    System.out.println("Post ID: " + dto.getIdPost() + ", Utilisateur: " + dto.getUserFirstName());
+                    System.out.println("Post ID: " + dto.getIdPost() + 
+                                     ", Utilisateur: " + dto.getUserFirstName() + 
+                                     " " + dto.getUserLastName());
                     return dto;
                 })
                 .toList();
@@ -37,7 +40,10 @@ public class PostService {
 
     public PostDTO createPost(PostDTO postDTO, User user) {
         Post post = PostMapper.INSTANCE.postDTOToPost(postDTO);
-        post.setUser(user); // Associer l'utilisateur au post
+        post.setUser(user);
+        post.setImageUrl(postDTO.getImageUrl());
+        post.setDateCreation(new Date());
+        
         Post savedPost = postRepository.save(post);
         return PostMapper.INSTANCE.postToPostDTO(savedPost);
     }
@@ -59,4 +65,6 @@ public class PostService {
         }
         postRepository.deleteById(id);
     }
+
+  
 }
