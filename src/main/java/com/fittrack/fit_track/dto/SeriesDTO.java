@@ -13,4 +13,6 @@ public class SeriesDTO {
     private Double poids;
     private String tempsDeRepetition;
     private String tempsRepos;
+    private Double caloriesBurned;
+    private Double distance;
 }

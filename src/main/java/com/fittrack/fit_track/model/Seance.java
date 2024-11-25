@@ -1,18 +1,26 @@
 package com.fittrack.fit_track.model;
 
 import java.time.LocalDateTime;
-import java.util.List;
+import java.util.Set;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.NamedAttributeNode;
+import jakarta.persistence.NamedEntityGraph;
+import jakarta.persistence.NamedSubgraph;
 import jakarta.persistence.OneToMany;
 
 @Entity
+@NamedEntityGraph(
+    name = "Seance.blocs.series",
+    attributeNodes = @NamedAttributeNode(value = "blocs", subgraph = "blocsSeries"),
+    subgraphs = @NamedSubgraph(name = "blocsSeries", attributeNodes = @NamedAttributeNode("series"))
+)
 public class Seance {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -20,11 +28,14 @@ public class Seance {
     
     private LocalDateTime dateSeance;
 
+    private String nameSeance;
+
     @ManyToOne
+    @JoinColumn(name = "user_id")
     private User user;
 
-    @OneToMany(fetch = FetchType.EAGER, mappedBy = "seance", cascade = CascadeType.ALL)
-    private List<Bloc> blocs;
+    @OneToMany(mappedBy = "seance", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<Bloc> blocs;
 
     // Getters and Setters
 
@@ -44,11 +55,11 @@ public class Seance {
         this.dateSeance = dateSeance;
     }
 
-    public List<Bloc> getBlocs() {
+    public Set<Bloc> getBlocs() {
         return blocs;
     }
 
-    public void setBlocs(List<Bloc> blocs) {
+    public void setBlocs(Set<Bloc> blocs) {
         this.blocs = blocs;
     }
 
@@ -58,5 +69,13 @@ public class Seance {
 
     public void setUser(User user) {
         this.user = user;
+    }
+
+    public String getNameSeance() {
+        return nameSeance;
+    }
+
+    public void setNameSeance(String nameSeance) {
+        this.nameSeance = nameSeance;
     }
 }

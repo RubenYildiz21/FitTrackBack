@@ -6,9 +6,10 @@ import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
 import com.fittrack.fit_track.dto.ExerciceDTO;
@@ -18,15 +19,16 @@ import com.fittrack.fit_track.model.Bloc;
 import com.fittrack.fit_track.model.Exercice;
 import com.fittrack.fit_track.model.Seance;
 import com.fittrack.fit_track.model.Series;
+import com.fittrack.fit_track.model.User;
 import com.fittrack.fit_track.model.enums.Equipement;
 import com.fittrack.fit_track.model.enums.ExerciseType;
 import com.fittrack.fit_track.model.enums.PartieCorps;
 import com.fittrack.fit_track.repository.ExerciceRepository;
 import com.fittrack.fit_track.repository.SeanceRepository;
+import com.fittrack.fit_track.repository.UserRepository;
 
 @Service
 @Validated
-@Transactional
 public class SeanceService {
 
     @Autowired
@@ -35,8 +37,16 @@ public class SeanceService {
     @Autowired
     private ExerciceRepository exerciceRepository;
 
+    @Autowired
+    private UserRepository userRepository;
+
+    private static final Logger logger = LoggerFactory.getLogger(SeanceService.class);
+
+
     // Créer une séance à partir d'un DTO et retourner le DTO créé
     public SeanceDTO enregistrerSeance(SeanceDTO seanceDTO) {
+        logger.info("Attempting to register seance: {}", seanceDTO);
+
         // Mapper le DTO vers l'entité
         Seance seance = SeanceMapper.INSTANCE.seanceDTOToSeance(seanceDTO);
 
@@ -44,7 +54,7 @@ public class SeanceService {
         if (seance.getDateSeance() == null) {
             throw new IllegalArgumentException("La date de la séance est obligatoire");
         }
-        
+
         if (seance.getBlocs() == null || seance.getBlocs().isEmpty()) {
             throw new IllegalArgumentException("Une séance doit contenir au moins un bloc d'exercice");
         }
@@ -55,6 +65,38 @@ public class SeanceService {
             computeStats(bloc);
         }
 
+        // Retrieve and set the User
+        if (seanceDTO.getUserId() != null) {
+            User user = userRepository.findById(seanceDTO.getUserId())
+                    .orElseThrow(() -> new IllegalArgumentException("L'utilisateur spécifié n'existe pas"));
+            seance.setUser(user);
+        } else {
+            throw new IllegalArgumentException("Un utilisateur doit être spécifié pour la séance");
+        }
+
+        // Set parent references
+        for (Bloc bloc : seance.getBlocs()) {
+            bloc.setSeance(seance); // Set parent seance
+
+            // Retrieve and set the Exercice
+            if (bloc.getExercice() != null && bloc.getExercice().getIdExercice() != null) {
+                Exercice exercice = exerciceRepository.findById(bloc.getExercice().getIdExercice())
+                        .orElseThrow(() -> new IllegalArgumentException("L'exercice spécifié n'existe pas"));
+                bloc.setExercice(exercice);
+            } else {
+                throw new IllegalArgumentException("Un bloc doit contenir un exercice valide");
+            }
+
+            // Set parent references for series
+            if (bloc.getSeries() != null) {
+                for (Series series : bloc.getSeries()) {
+                    series.setBloc(bloc); // Set parent bloc
+                }
+            } else {
+                throw new IllegalArgumentException("Un bloc doit contenir au moins une série");
+            }
+            computeStats(bloc);
+        }
         // Sauvegarder la séance
         Seance nouvelleSeance = seanceRepository.save(seance);
 
@@ -64,24 +106,23 @@ public class SeanceService {
 
     // Valider un bloc
     private void validerBloc(Bloc bloc) {
-        if(bloc.getExercice() == null) {
+        if (bloc.getExercice() == null) {
             throw new IllegalArgumentException("Un bloc doit contenir un exercice");
         }
-        
+
         // Vérifier que l'exercice existe
         Exercice exercice = exerciceRepository.findById(bloc.getExercice().getIdExercice())
-            .orElseThrow(() -> new IllegalArgumentException("L'exercice spécifié n'existe pas"));
-        
+                .orElseThrow(() -> new IllegalArgumentException("L'exercice spécifié n'existe pas"));
+
         bloc.setExercice(exercice);
 
         // Validation et calcul des series
-        if(bloc.getSeries() == null || bloc.getSeries().isEmpty()) {
+        if (bloc.getSeries() == null || bloc.getSeries().isEmpty()) {
             throw new IllegalArgumentException("Un bloc doit contenir au moins une série");
         }
 
-        for(Series series : bloc.getSeries()) {
+        for (Series series : bloc.getSeries()) {
             validerSerie(series);
-            computeStats(series, bloc);
         }
     }
 
@@ -93,12 +134,10 @@ public class SeanceService {
                 LocalTime.parse(time);
             } catch (Exception e) {
                 throw new IllegalArgumentException(
-                    String.format("Format invalide pour le %s. Utilisez le format HH:mm:ss", fieldName)
-                );
+                        String.format("Format invalide pour le %s. Utilisez le format HH:mm:ss", fieldName));
             }
         }
     }
-
 
     private void validerSerie(Series series) {
         if (series.getReps() == null || series.getReps() <= 0) {
@@ -115,21 +154,21 @@ public class SeanceService {
         validateTimeFormat(series.getTempsDeRepetition(), "temps de répétition");
     }
 
-    private void computeStats(Bloc bloc){
+    private void computeStats(Bloc bloc) {
         double totalCaloriesBurned = 0.0;
         double totalDistance = 0.0;
-
         for (Series series : bloc.getSeries()) {
             computeStats(series, bloc);
-            totalCaloriesBurned += series.getCaloriesBurned();
-            totalDistance += series.getDistance();
+            totalCaloriesBurned += (series.getCaloriesBurned() != null) ? series.getCaloriesBurned() : 0.0;
+            totalDistance += (series.getDistance() != null) ? series.getDistance() : 0.0;
         }
 
         bloc.setCaloriesBurned(totalCaloriesBurned);
         bloc.setDistance(totalDistance);
     }
+
     // Calculer les statistiques pour un bloc
-    private void computeStats(Series series, Bloc bloc){
+    private void computeStats(Series series, Bloc bloc) {
         Exercice exercice = bloc.getExercice();
         ExerciseType type = exercice.getType();
 
@@ -144,7 +183,7 @@ public class SeanceService {
         double caloriesBurned = 0.0;
         double distance = 0.0;
 
-        switch(type) {
+        switch (type) {
             case STRENGTH -> {
                 // Exemple de formule : MET pour entraînement de force ~6
                 double metStrength = 6.0;
@@ -167,17 +206,18 @@ public class SeanceService {
                 distance = avgSpeed * durationHours;
             }
             default -> {
-                
+
                 // Autres types d'exercices peuvent être traités ici
             }
         }
         // Autres types d'exercices peuvent être traités ici
 
-        bloc.setCaloriesBurned(caloriesBurned);
-        bloc.setDistance(distance);
+        series.setCaloriesBurned(caloriesBurned);
+        series.setDistance(distance);
     }
 
-    // Calculer la durée totale en heures basée sur les séries, temps de répétition et temps de repos
+    // Calculer la durée totale en heures basée sur les séries, temps de répétition
+    // et temps de repos
     private double calculateDuration(Series series) {
         int serie = series.getSerie();
         String tempsDeRepetition = series.getTempsDeRepetition(); // "HH:mm:ss"
@@ -195,9 +235,11 @@ public class SeanceService {
 
     // Convertir un temps au format "HH:mm:ss" en secondes
     private long parseTimeToSeconds(String time) {
-        if (time == null || time.isEmpty()) return 0;
+        if (time == null || time.isEmpty())
+            return 0;
         String[] parts = time.split(":");
-        if (parts.length != 3) return 0;
+        if (parts.length != 3)
+            return 0;
         try {
             long hours = Long.parseLong(parts[0]);
             long minutes = Long.parseLong(parts[1]);
@@ -212,16 +254,16 @@ public class SeanceService {
     public List<ExerciceDTO> filtrerExercices(PartieCorps partieCorps) {
         List<Exercice> exercices = exerciceRepository.findByPartieCorps(partieCorps);
         return exercices.stream()
-                        .map(com.fittrack.fit_track.mapper.ExerciceMapper.INSTANCE::exerciceToExerciceDTO)
-                        .toList();
+                .map(com.fittrack.fit_track.mapper.ExerciceMapper.INSTANCE::exerciceToExerciceDTO)
+                .toList();
     }
 
     // Filtrer les exercices par équipement et retourner les DTOs
     public List<ExerciceDTO> filtrerExercices(Equipement equipement) {
         List<Exercice> exercices = exerciceRepository.findByEquipementNecessaire(equipement);
         return exercices.stream()
-                        .map(com.fittrack.fit_track.mapper.ExerciceMapper.INSTANCE::exerciceToExerciceDTO)
-                        .toList();
+                .map(com.fittrack.fit_track.mapper.ExerciceMapper.INSTANCE::exerciceToExerciceDTO)
+                .toList();
     }
 
     // Récupérer une séance par ID et la convertir en DTO

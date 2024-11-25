@@ -23,8 +23,8 @@ public class Series {
     @JoinColumn(name = "idBloc")
     private Bloc bloc;
     
-    private Double caloriesBurned;
-    private Double distance;
+    private Double caloriesBurned = 0.0;
+    private Double distance = 0.0;
     
     // Getters and Setters
 

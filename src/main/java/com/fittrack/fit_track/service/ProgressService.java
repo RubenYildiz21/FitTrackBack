@@ -4,7 +4,7 @@ package com.fittrack.fit_track.service;
 
 import java.time.DayOfWeek;
 import java.time.LocalDateTime;
-import java.time.temporal.TemporalAdjusters;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -36,34 +36,75 @@ public class ProgressService {
             case "yearly":
                 startDate = endDate.minusYears(1);
                 break;
+            case "all":
+                startDate = LocalDateTime.MIN; // Inclure toutes les données depuis le début
+                break;
             case "weekly":
             default:
                 startDate = endDate.minusWeeks(1);
                 break;
         }
 
-        List<Seance> seances = seanceRepository.findByUserIdAndDateSeanceBetween(userId, startDate, endDate);
+        List<Seance> seances = seanceRepository.findSeancesWithBlocsAndSeries(userId, startDate, endDate);
 
         Map<String, Integer> repsPerPeriod = new TreeMap<>();
+        Map<String, Integer> setsPerPeriod = new TreeMap<>();
+        Map<String, Double> weightLiftedPerPeriod = new TreeMap<>();
         Map<String, Double> caloriesPerPeriod = new TreeMap<>();
         Map<String, Double> distancePerPeriod = new TreeMap<>();
+        Map<String, Double> personalRecords = new HashMap<>();
+        Map<String, Integer> workoutsPerDay = new TreeMap<>();
+
+        // Variables pour le poids maximal
+        double totalWeightLifted = 0.0;
+        double maxWeightLifted = 0.0;
+        String exerciseWithMaxWeight = "";
 
         for (Seance seance : seances) {
-            String key = getPeriodKey(seance.getDateSeance(), period);
+            String periodKey = getPeriodKey(seance.getDateSeance(), period);
+            String dayKey = seance.getDateSeance().toLocalDate().toString();
+
+            // Track workouts per day
+            workoutsPerDay.put(dayKey, workoutsPerDay.getOrDefault(dayKey, 0) + 1);
 
             for (Bloc bloc : seance.getBlocs()) {
-                if (bloc.getSeries() != null) {
+                if (bloc.getSeries() != null && !bloc.getSeries().isEmpty()) {
+                    // Increment sets per period
+                    int numSets = bloc.getSeries().size();
+                    setsPerPeriod.put(periodKey, setsPerPeriod.getOrDefault(periodKey, 0) + numSets);
+
                     for (Series series : bloc.getSeries()) {
-                        // Calculer les répétitions totales
-                        repsPerPeriod.put(key, repsPerPeriod.getOrDefault(key, 0) + series.getReps());
 
-                        // Calculer les calories brûlées
+                        // Get exercise name
+                        String exerciseName = bloc.getExercice().getNom();
+
+                        // Calculer le poids total soulevé
+                        totalWeightLifted += series.getReps() * series.getPoids();
+
+                        // Mettre à jour le poids maximal soulevé
+                        if (series.getPoids() > maxWeightLifted) {
+                            maxWeightLifted = series.getPoids();
+                            exerciseWithMaxWeight = exerciseName;
+                        }
+
+                        // Calculate total weight lifted
+                        double weightLifted = series.getReps() * series.getPoids();
+                        weightLiftedPerPeriod.put(periodKey,
+                                weightLiftedPerPeriod.getOrDefault(periodKey, 0.0) + weightLifted);
+
+                        // Update personal records
+                        double currentPR = personalRecords.getOrDefault(exerciseName, 0.0);
+                        if (series.getPoids() > currentPR) {
+                            personalRecords.put(exerciseName, series.getPoids());
+                        }
+
+                        // Calculate calories burned
                         Double calories = series.getCaloriesBurned() != null ? series.getCaloriesBurned() : 0.0;
-                        caloriesPerPeriod.put(key, caloriesPerPeriod.getOrDefault(key, 0.0) + calories);
+                        caloriesPerPeriod.put(periodKey, caloriesPerPeriod.getOrDefault(periodKey, 0.0) + calories);
 
-                        // Calculer la distance parcourue
+                        // Calculate distance
                         Double distance = series.getDistance() != null ? series.getDistance() : 0.0;
-                        distancePerPeriod.put(key, distancePerPeriod.getOrDefault(key, 0.0) + distance);
+                        distancePerPeriod.put(periodKey, distancePerPeriod.getOrDefault(periodKey, 0.0) + distance);
                     }
                 }
             }
@@ -71,8 +112,15 @@ public class ProgressService {
 
         ProgressDTO progress = new ProgressDTO();
         progress.setRepetitionsPerPeriod(repsPerPeriod);
+        progress.setSetsPerPeriod(setsPerPeriod);
+        progress.setWeightLiftedPerPeriod(weightLiftedPerPeriod);
         progress.setCaloriesBurnedPerPeriod(caloriesPerPeriod);
         progress.setDistancePerPeriod(distancePerPeriod);
+        progress.setPersonalRecords(personalRecords);
+        progress.setWorkoutsPerDay(workoutsPerDay);
+        progress.setTotalWeightLifted(totalWeightLifted);
+        progress.setMaxWeightLifted(maxWeightLifted);
+        progress.setExerciseWithMaxWeight(exerciseWithMaxWeight);
 
         return progress;
     }
@@ -86,7 +134,7 @@ public class ProgressService {
             case "weekly":
             default:
                 // Retourne le début de la semaine (Lundi)
-                return date.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY)).toLocalDate().toString();
+                return date.with(DayOfWeek.MONDAY).toLocalDate().toString();
         }
     }
 }

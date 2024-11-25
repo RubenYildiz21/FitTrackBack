@@ -1,6 +1,5 @@
 package com.fittrack.fit_track.model;
 
-import java.util.List;
 import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -61,7 +60,7 @@ public class User {
     private Set<String> roles;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<Seance> seances;
+    private Set<Seance> seances;
 
     // Getters et Setters
     public Long getId() {
@@ -184,11 +183,11 @@ public class User {
         this.roles = roles;
     }
 
-    public List<Seance> getSeances() {
+    public Set<Seance> getSeances() {
         return seances;
     }
 
-    public void setSeances(List<Seance> seances) {
+    public void setSeances(Set<Seance> seances) {
         this.seances = seances;
     }
 }
