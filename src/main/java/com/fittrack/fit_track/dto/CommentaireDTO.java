@@ -19,4 +19,5 @@ public class CommentaireDTO {
     private Long userId;
     private String userFirstName;
     private String userLastName;
+    private String userProfilePicture; 
 }
