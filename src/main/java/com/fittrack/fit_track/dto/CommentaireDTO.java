@@ -8,6 +8,7 @@ import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import java.util.List;
 
 
 @Data
@@ -46,4 +47,15 @@ public class CommentaireDTO {
     @Getter
     @Setter
     private String userProfilePicture; 
+
+    @Getter
+    @Setter
+    private Long parentCommentId;
+
+    @Getter
+    @Setter
+    private List<CommentaireDTO> replies;
+    
+
+
 }
