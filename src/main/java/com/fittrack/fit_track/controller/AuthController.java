@@ -183,15 +183,4 @@ public class AuthController {
         // Implémenter la logique de déconnexion si nécessaire
         return ResponseEntity.ok("Logged out successfully");
     }
-
-    private String getUploadDir() {
-        String os = System.getProperty("os.name").toLowerCase();
-        if (os.contains("mac")) {
-            return uploadDirMac;
-        } else if (os.contains("win")) {
-            return uploadDirWindows;
-        } else {
-            throw new RuntimeException("Unsupported operating system: " + os);
-        }
-    }
 }
