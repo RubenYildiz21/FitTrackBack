@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -57,15 +56,6 @@ public class AuthController {
 
     @Autowired
     private UserMapper userMapper;
-
-    @Value("${app.upload.dir.windows}")
-    private String uploadDirWindows;
-
-    @Value("${app.upload.dir.mac}")
-    private String uploadDirMac;
-
-    @Value("${app.base.url}")
-    private String baseUrl;
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@Valid @RequestBody LoginRequest loginRequest, BindingResult bindingResult) {
