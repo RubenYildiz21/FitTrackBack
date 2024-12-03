@@ -13,6 +13,7 @@ import com.fittrack.fit_track.dto.UserDTO;
 import com.fittrack.fit_track.mapper.UserMapper;
 import com.fittrack.fit_track.model.User;
 import com.fittrack.fit_track.repository.UserRepository;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 @Service
 public class UserService {
@@ -21,6 +22,9 @@ public class UserService {
 
     @Autowired
     private UserMapper userMapper;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     // Récupérer un utilisateur par son ID et le convertir en DTO
     public Optional<UserDTO> getUserById(Long id) {
@@ -78,5 +82,18 @@ public class UserService {
 
         User updatedUser = userRepository.save(user);
         return userMapper.userToUserDTO(updatedUser);
+    }
+
+    public void resetPassword(String email, String oldPassword, String newPassword) {
+        User user = userRepository.findByEmail(email)
+            .orElseThrow(() -> new RuntimeException("Aucun compte associé à cet email"));
+        
+        // Vérifier l'ancien mot de passe
+        if (!passwordEncoder.matches(oldPassword, user.getPassword())) {
+            throw new RuntimeException("Ancien mot de passe incorrect");
+        }
+        
+        user.setPassword(passwordEncoder.encode(newPassword));
+        userRepository.save(user);
     }
 }
