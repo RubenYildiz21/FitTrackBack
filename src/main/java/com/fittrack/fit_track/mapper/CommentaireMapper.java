@@ -16,9 +16,15 @@ public interface CommentaireMapper {
     @Mapping(source = "user.firstName", target = "userFirstName")
     @Mapping(source = "user.lastName", target = "userLastName")
     @Mapping(source = "user.profilePicture", target = "userProfilePicture") 
+
+    @Mapping(source = "parentComment.idCommentaire", target = "parentCommentId")
+    @Mapping(source = "replies", target = "replies")
     CommentaireDTO commentaireToCommentaireDTO(Commentaire commentaire);
     
     @Mapping(source = "postId", target = "post.idPost")
     @Mapping(source = "userId", target = "user.id")
+
+    @Mapping(source = "parentCommentId", target = "parentComment.idCommentaire")
+    @Mapping(target = "replies", ignore = true)
     Commentaire commentaireDTOToCommentaire(CommentaireDTO commentaireDTO);
 }

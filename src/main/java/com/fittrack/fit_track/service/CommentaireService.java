@@ -30,7 +30,7 @@ public class CommentaireService {
     public CommentaireDTO createCommentaire(CommentaireDTO commentaireDTO) {
         Post post = postRepository.findById(commentaireDTO.getPostId())
             .orElseThrow(() -> new RuntimeException("Post not found"));
-            
+
         User user = userRepository.findById(commentaireDTO.getUserId())
             .orElseThrow(() -> new RuntimeException("User not found"));
 
@@ -40,14 +40,39 @@ public class CommentaireService {
         commentaire.setPost(post);
         commentaire.setUser(user);
 
+        if (commentaireDTO.getParentCommentId() != null) {
+            Commentaire parentComment = commentaireRepository.findById(commentaireDTO.getParentCommentId())
+                .orElseThrow(() -> new RuntimeException("Parent comment not found"));
+            commentaire.setParentComment(parentComment);
+        }
+
         Commentaire savedCommentaire = commentaireRepository.save(commentaire);
         return CommentaireMapper.INSTANCE.commentaireToCommentaireDTO(savedCommentaire);
     }
 
     public List<CommentaireDTO> getCommentairesByPostId(Long postId) {
-        List<Commentaire> commentaires = commentaireRepository.findByPostIdPostOrderByDateCommentaireDesc(postId);
-        return commentaires.stream()
-                .map(CommentaireMapper.INSTANCE::commentaireToCommentaireDTO)
-                .toList();
+        try {
+            List<Commentaire> commentaires = commentaireRepository.findByPostIdPostAndParentCommentIsNullOrderByDateCommentaireDesc(postId);
+            return commentaires.stream()
+                    .map(commentaire -> {
+                        CommentaireDTO dto = CommentaireMapper.INSTANCE.commentaireToCommentaireDTO(commentaire);
+                        if (commentaire.getReplies() != null) {
+                            dto.setReplies(commentaire.getReplies().stream()
+                                    .map(CommentaireMapper.INSTANCE::commentaireToCommentaireDTO)
+                                    .toList());
+                        }
+                        return dto;
+                    })
+                    .toList();
+        } catch (Exception e) {
+            e.printStackTrace(); // Pour le débogage
+            throw new RuntimeException("Erreur lors de la récupération des commentaires: " + e.getMessage());
+        }
     }
+
+    
+
+
+
+    
 }

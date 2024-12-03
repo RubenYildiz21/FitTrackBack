@@ -52,6 +52,7 @@ public class SecurityConfig implements WebMvcConfigurer {
                         // Endpoints publics
                         .requestMatchers(
                                 "/api/auth/**",
+                                 "/api/password/reset",
                                 "/swagger-ui/**",
                                 "/v3/api-docs/**",
                                 "/swagger-ui.html")
