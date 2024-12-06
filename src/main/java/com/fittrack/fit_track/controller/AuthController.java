@@ -1,6 +1,7 @@
 package com.fittrack.fit_track.controller;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -140,7 +141,7 @@ public class AuthController {
         // Enregistrer l'image en tant que tableau de bytes
         if (profilePicture != null && !profilePicture.isEmpty()) {
             try {
-                user.setProfilePicture(profilePicture.getBytes());
+                user.setProfilePicture(Arrays.toString(profilePicture.getBytes()));
             } catch (IOException e) {
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error saving profile picture");
             }

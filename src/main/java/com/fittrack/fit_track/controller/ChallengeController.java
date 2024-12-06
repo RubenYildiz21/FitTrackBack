@@ -1,5 +1,11 @@
 package com.fittrack.fit_track.controller;
 
+import com.fittrack.fit_track.dto.ChallengeDTO;
+import com.fittrack.fit_track.dto.UserChallengeDTO;
+import com.fittrack.fit_track.dto.UserDTO;
+import com.fittrack.fit_track.mapper.ChallengeMapper;
+import com.fittrack.fit_track.mapper.UserChallengeMapper;
+import com.fittrack.fit_track.mapper.UserMapper;
 import com.fittrack.fit_track.model.Challenge;
 import com.fittrack.fit_track.model.User;
 import com.fittrack.fit_track.model.UserChallenge;
@@ -21,6 +27,15 @@ public class ChallengeController {
     private ChallengeRepository challengeRepository;
 
     @Autowired
+    private ChallengeMapper challengeMapper;
+
+    @Autowired
+    private UserMapper userMapper;
+
+    @Autowired
+    private UserChallengeMapper userChallengeMapper;
+
+    @Autowired
     private UserChallengeRepository userChallengeRepository;
     @Autowired
     private UserRepository userRepository;
@@ -32,14 +47,15 @@ public class ChallengeController {
             return ResponseEntity.badRequest().body("All fields are required");
         }
 
-        Challenge savedChallenge = challengeRepository.save(challenge);
+        ChallengeDTO savedChallenge =  challengeMapper.challengeToDTO(challengeRepository.save(challenge));
 
-        UserChallenge userChallenge = new UserChallenge();
-        userChallenge.setUserId(savedChallenge.getIdUser());
-        userChallenge.setChallengeId(savedChallenge.getId());
-        userChallenge.setUserScore(0L);
+        UserChallengeDTO userChallengeDTO = new UserChallengeDTO();
+        userChallengeDTO.setUser_id(savedChallenge.getId_user());
+        userChallengeDTO.setChallenge_id(savedChallenge.getId());
+        userChallengeDTO.setUser_score(0L);
 
-        UserChallenge savedUserChallenge = userChallengeRepository.save(userChallenge);
+
+        UserChallengeDTO savedUserChallenge = userChallengeMapper.userChallengeToDTO(userChallengeRepository.save(userChallengeMapper.userChallengeDTOToUserChallenge(userChallengeDTO))); ;
 
         Map<String, Object> response = new HashMap<>();
         response.put("challenge", savedChallenge);
@@ -50,29 +66,42 @@ public class ChallengeController {
 
     // Récupérer tous les défis
     @GetMapping("/all")
-    public ResponseEntity<List<Challenge>> getAllChallenges() {
-        List<Challenge> challenges = challengeRepository.findAll();
+    public ResponseEntity<List<ChallengeDTO>> getAllChallenges() {
+        List<ChallengeDTO> challenges = challengeRepository.findAll().stream()
+                .map(challengeMapper::challengeToDTO)
+                .collect(Collectors.toList());
         return ResponseEntity.ok(challenges);
     }
 
     @GetMapping("/user/{userId}")
-    public ResponseEntity<Map<String, List<Challenge>>> getChallengesByUser(@PathVariable Long userId) {
-        // Fetch challenges the user is participating in
-        List<UserChallenge> userChallenges = userChallengeRepository.findByUserId(userId);
-        List<Long> participatingChallengeIds = userChallenges.stream()
-                .map(UserChallenge::getChallengeId)
+    public ResponseEntity<Map<String, List<ChallengeDTO>>> getChallengesByUser(@PathVariable Long userId) {
+
+        List<UserChallengeDTO> userChallenges = userChallengeRepository.findByUserId(userId).stream()
+                .map(userChallengeMapper::userChallengeToDTO)
                 .collect(Collectors.toList());
 
-        List<Challenge> participatingChallenges = challengeRepository.findAllById(participatingChallengeIds);
 
-        // Fetch joinable challenges
-        List<Challenge> allChallenges = challengeRepository.findAll();
-        List<Challenge> joinableChallenges = allChallenges.stream()
+        List<Long> participatingChallengeIds = userChallenges.stream()
+                .map(UserChallengeDTO::getChallenge_id)
+                .collect(Collectors.toList());
+
+
+        List<ChallengeDTO> participatingChallenges = challengeRepository.findAllById(participatingChallengeIds).stream()
+                .map(challengeMapper::challengeToDTO)
+                .collect(Collectors.toList());
+
+
+        List<ChallengeDTO> allChallenges = challengeRepository.findAll().stream()
+                .map(challengeMapper::challengeToDTO)
+                .collect(Collectors.toList());
+
+
+        List<ChallengeDTO> joinableChallenges = allChallenges.stream()
                 .filter(challenge -> !participatingChallengeIds.contains(challenge.getId()))
                 .collect(Collectors.toList());
 
-        // Prepare response
-        Map<String, List<Challenge>> response = new HashMap<>();
+
+        Map<String, List<ChallengeDTO>> response = new HashMap<>();
         response.put("participating", participatingChallenges);
         response.put("joinable", joinableChallenges);
 
@@ -82,7 +111,9 @@ public class ChallengeController {
     // Récupérer un défi par ID
     @GetMapping("/{id}")
     public ResponseEntity<?> getChallengeById(@PathVariable Long id) {
-        Optional<Challenge> challengeOpt = challengeRepository.findById(id);
+
+        Optional<ChallengeDTO> challengeOpt = challengeRepository.findById(id).map(challengeMapper::challengeToDTO);
+        //Optional<Challenge> challengeOpt = challengeRepository.findById(id);
 
         if (challengeOpt.isEmpty()) {
             return ResponseEntity.badRequest().body("Challenge not found");
@@ -94,26 +125,38 @@ public class ChallengeController {
     // Modifier un défi
     @PutMapping("/edit/{id}")
     public ResponseEntity<?> editChallenge(@PathVariable Long id, @RequestBody Challenge updatedChallenge) {
-        Optional<Challenge> challengeOpt = challengeRepository.findById(id);
+
+        Optional<ChallengeDTO> challengeOpt = challengeRepository.findById(id).map(challengeMapper::challengeToDTO);
+
+        //Optional<Challenge> challengeOpt = challengeRepository.findById(id);
 
         if (challengeOpt.isEmpty()) {
             return ResponseEntity.badRequest().body("Challenge not found");
         }
 
-        Challenge existingChallenge = challengeOpt.get();
+        ChallengeDTO existingChallenge = challengeOpt.get();
+        existingChallenge.setTitle(updatedChallenge.getTitle());
+        existingChallenge.setExercise(updatedChallenge.getExercise());
+        existingChallenge.setBeginDate(updatedChallenge.getBeginingDate());
+        existingChallenge.setEndDate(updatedChallenge.getEndingDate());
+
+        /*Challenge existingChallenge = challengeOpt.get();
         existingChallenge.setTitle(updatedChallenge.getTitle());
         existingChallenge.setExercise(updatedChallenge.getExercise());
         existingChallenge.setBeginingDate(updatedChallenge.getBeginingDate());
-        existingChallenge.setEndingDate(updatedChallenge.getEndingDate());
+        existingChallenge.setEndingDate(updatedChallenge.getEndingDate()); */
 
-        Challenge savedChallenge = challengeRepository.save(existingChallenge);
+        ChallengeDTO savedChallenge = challengeMapper.challengeToDTO(challengeRepository.save(challengeMapper.challengeDTOToChallenge(existingChallenge)));
+        //Challenge savedChallenge = challengeRepository.save(existingChallenge);
         return ResponseEntity.ok(savedChallenge);
     }
 
     // Supprimer un défi
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<?> deleteChallenge(@PathVariable Long id) {
-        Optional<Challenge> challengeOpt = challengeRepository.findById(id);
+
+        Optional<ChallengeDTO> challengeOpt = challengeRepository.findById(id).map(challengeMapper::challengeToDTO);
+        //Optional<Challenge> challengeOpt = challengeRepository.findById(id);
 
         if (challengeOpt.isEmpty()) {
             return ResponseEntity.badRequest().body("Challenge not found");
@@ -125,20 +168,25 @@ public class ChallengeController {
 
     @PostMapping("/join")
     public ResponseEntity<?> joinChallenge(@RequestBody UserChallenge userChallenge) {
+        UserChallengeDTO userChallengeDTO = userChallengeMapper.userChallengeToDTO(userChallenge);
 
-        if (userChallenge.getUserId() == null || userChallenge.getChallengeId() == null) {
+        if (userChallengeDTO.getUser_id() == 0 || userChallengeDTO.getChallenge_id() == 0) {
             return ResponseEntity.badRequest().body("User ID and Challenge ID are required");
         }
-        userChallenge.setUserScore(0L);
-        UserChallenge savedUserChallenge = userChallengeRepository.save(userChallenge);
+        userChallengeDTO.setUser_score(0L);
+        UserChallengeDTO savedUserChallenge = userChallengeMapper.userChallengeToDTO(userChallengeRepository.save(userChallengeMapper.userChallengeDTOToUserChallenge(userChallengeDTO)));
         return ResponseEntity.ok(savedUserChallenge);
     }
 
 
     @GetMapping("/leaderBoard/{challengeId}")
     public ResponseEntity<List<Map<String, Object>>> getLeaderBoard(@PathVariable Long challengeId) {
-        // Fetch users participating in the challenge
-        List<UserChallenge> participatingUsers = userChallengeRepository.findByChallengeId(challengeId);
+
+        List<UserChallengeDTO> participatingUsers = userChallengeRepository.findByChallengeId(challengeId).stream()
+                .map(userChallengeMapper::userChallengeToDTO)
+                .collect(Collectors.toList());
+
+        //List<UserChallenge> participatingUsers = userChallengeRepository.findByChallengeId(challengeId);
 
         if (participatingUsers.isEmpty()) {
             return ResponseEntity.ok(new ArrayList<>()); // Return an empty list if no participants
@@ -146,12 +194,13 @@ public class ChallengeController {
 
         // Map each user to their score
         List<Map<String, Object>> leaderboard = participatingUsers.stream().map(userChallenge -> {
-                    Optional<User> user = userRepository.findById(userChallenge.getUserId());
+                    Optional<User> user = userRepository.findById(userChallenge.getUser_id()); ;
 
                     if (user.isPresent()) {
+                        UserDTO userDTO = userMapper.userToUserDTO(user.get());
                         Map<String, Object> entry = new HashMap<>();
-                        entry.put("name", user.get().getFirstName() + " " + user.get().getLastName());
-                        entry.put("score", userChallenge.getUserScore()); // Add user score
+                        entry.put("name", userDTO.getFirstName() + " " + userDTO.getLastName());
+                        entry.put("score", userChallenge.getUser_score());
                         return entry;
                     }
 
@@ -166,11 +215,13 @@ public class ChallengeController {
     @PostMapping("/quit")
     public ResponseEntity<?> quitChallenge(@RequestBody UserChallenge userChallenge) {
 
-        if (userChallenge.getUserId() == null || userChallenge.getChallengeId() == null) {
+        UserChallengeDTO userChallengeDTO = userChallengeMapper.userChallengeToDTO(userChallenge);
+
+        if (userChallengeDTO.getUser_id() ==0  || userChallengeDTO.getChallenge_id() == 0) {
             return ResponseEntity.badRequest().body("User ID and Challenge ID are required");
         }
 
-        userChallengeRepository.delete(userChallenge);
-        return ResponseEntity.ok(userChallenge);}
+        userChallengeRepository.delete(userChallengeMapper.userChallengeDTOToUserChallenge(userChallengeDTO));
+        return ResponseEntity.ok(userChallengeDTO);}
 
 }

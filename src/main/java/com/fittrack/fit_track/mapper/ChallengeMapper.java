@@ -15,16 +15,16 @@ public interface ChallengeMapper {
     @Mappings({
             @Mapping(source = "idUser", target = "id_user"),
             @Mapping(source = "description", target = "description"),
-            @Mapping(source = "beginingDate", target = "beginDate", qualifiedByName = "localDateToLocalDateTime"),
-            @Mapping(source = "endingDate", target = "endDate", qualifiedByName = "localDateToLocalDateTime")
+            @Mapping(source = "beginingDate", target = "beginDate"),
+            @Mapping(source = "endingDate", target = "endDate")
     })
     ChallengeDTO challengeToDTO(Challenge challenge);
 
     @Mappings({
             @Mapping(source = "id_user", target = "idUser"),
             @Mapping(source = "description", target = "description"),
-            @Mapping(source = "beginDate", target = "beginingDate", qualifiedByName = "localDateTimeToLocalDate"),
-            @Mapping(source = "endDate", target = "endingDate", qualifiedByName = "localDateTimeToLocalDate")
+            @Mapping(source = "beginDate", target = "beginingDate"),
+            @Mapping(source = "endDate", target = "endingDate")
     })
     Challenge challengeDTOToChallenge(ChallengeDTO challengeDTO);
 
