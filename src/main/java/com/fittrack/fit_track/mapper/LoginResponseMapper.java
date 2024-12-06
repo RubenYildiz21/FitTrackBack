@@ -11,6 +11,6 @@ import com.fittrack.fit_track.model.User;
 public interface LoginResponseMapper {
     LoginResponseMapper INSTANCE = Mappers.getMapper(LoginResponseMapper.class);
     
-    @Mapping(source = "user", target = "user")
+    //@Mapping(source = "user", target = "user")
     LoginResponseDTO toLoginResponseDTO(String token, User user);
 }

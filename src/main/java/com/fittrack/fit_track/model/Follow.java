@@ -9,11 +9,11 @@ public class Follow {
     private Long idConnection; // Clé primaire auto-incrémentée
 
     @ManyToOne
-    @JoinColumn(name = "idUserFollow")
+    @JoinColumn(name = "id_User_Follow")
     private User follow;  // Utilisateur se fait follow
 
     @ManyToOne
-    @JoinColumn(name = "idUserFollower")
+    @JoinColumn(name = "id_User_Follower")
     private User follower;  // Utilisateur qui follow
 
     // Getters et setters

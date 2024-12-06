@@ -10,25 +10,36 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
+import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
+
+@Data
 @Entity
 public class Defi {
+    // Getters and Setters
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long idDefi;
     
+
     private String objectif;
-    
+
+
     @ManyToOne
     @JoinColumn(name = "idCreateur")
     private User createur;
 
     // Relations
+
     @ManyToMany
     @JoinTable(name = "participer", joinColumns = @JoinColumn(name = "idDefi"), inverseJoinColumns = @JoinColumn(name = "idUser"))
     private List<User> participants;
 
     // Getters and Setters
+
 
     public Long getIdDefi() {
         return idDefi;
@@ -61,4 +72,6 @@ public class Defi {
     public void setParticipants(List<User> participants) {
         this.participants = participants;
     }
+
+
 }

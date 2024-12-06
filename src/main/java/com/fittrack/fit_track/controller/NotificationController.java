@@ -1,4 +1,4 @@
-package com.fittrack.fit_track.controller;
+/*package com.fittrack.fit_track.controller;
 
 import com.fittrack.fit_track.model.Challenge;
 import com.fittrack.fit_track.model.User;
@@ -174,3 +174,4 @@ public class NotificationController {
         return ResponseEntity.ok(userChallenge);}
 
 }
+*/
