@@ -1,9 +1,5 @@
 package com.fittrack.fit_track.controller;
 
-import com.fittrack.fit_track.dto.ChallengeDTO;
-import com.fittrack.fit_track.dto.UserChallengeDTO;
-import com.fittrack.fit_track.mapper.ChallengeMapper;
-import com.fittrack.fit_track.mapper.UserChallengeMapper;
 import com.fittrack.fit_track.model.Challenge;
 import com.fittrack.fit_track.model.User;
 import com.fittrack.fit_track.model.UserChallenge;
@@ -26,15 +22,8 @@ public class ChallengeController {
 
     @Autowired
     private UserChallengeRepository userChallengeRepository;
-
     @Autowired
     private UserRepository userRepository;
-
-    @Autowired
-    private ChallengeMapper challengeMapper;
-
-    @Autowired
-    private UserChallengeMapper userChallengeMapper;
 
     @PostMapping("/create")
     public ResponseEntity<?> createChallenge(@RequestBody Challenge challenge) {
@@ -43,17 +32,14 @@ public class ChallengeController {
             return ResponseEntity.badRequest().body("All fields are required");
         }
 
-        // Save challenge and convert to DTO
-        ChallengeDTO savedChallenge = challengeMapper.challengeToDTO(challengeRepository.save(challenge));
+        Challenge savedChallenge = challengeRepository.save(challenge);
 
-        // Create user challenge
         UserChallenge userChallenge = new UserChallenge();
-        userChallenge.setUserId(savedChallenge.getId_user());
+        userChallenge.setUserId(savedChallenge.getIdUser());
         userChallenge.setChallengeId(savedChallenge.getId());
         userChallenge.setUserScore(0L);
 
-        // Save user challenge and convert to DTO
-        UserChallengeDTO savedUserChallenge = userChallengeMapper.userChallengeToDTO(userChallengeRepository.save(userChallenge));
+        UserChallenge savedUserChallenge = userChallengeRepository.save(userChallenge);
 
         Map<String, Object> response = new HashMap<>();
         response.put("challenge", savedChallenge);
@@ -62,101 +48,129 @@ public class ChallengeController {
         return ResponseEntity.ok(response);
     }
 
+    // Récupérer tous les défis
     @GetMapping("/all")
-    public ResponseEntity<List<ChallengeDTO>> getAllChallenges() {
-        List<ChallengeDTO> challenges = challengeRepository.findAll()
-                .stream()
-                .map(challengeMapper::challengeToDTO)
-                .collect(Collectors.toList());
+    public ResponseEntity<List<Challenge>> getAllChallenges() {
+        List<Challenge> challenges = challengeRepository.findAll();
         return ResponseEntity.ok(challenges);
     }
 
     @GetMapping("/user/{userId}")
-    public ResponseEntity<Map<String, List<ChallengeDTO>>> getChallengesByUser(@PathVariable Long userId) {
+    public ResponseEntity<Map<String, List<Challenge>>> getChallengesByUser(@PathVariable Long userId) {
         // Fetch challenges the user is participating in
         List<UserChallenge> userChallenges = userChallengeRepository.findByUserId(userId);
-
         List<Long> participatingChallengeIds = userChallenges.stream()
                 .map(UserChallenge::getChallengeId)
                 .collect(Collectors.toList());
 
-        // Convert challenges to DTO
-        List<ChallengeDTO> participatingChallenges = challengeRepository.findAllById(participatingChallengeIds)
-                .stream()
-                .map(challengeMapper::challengeToDTO)
-                .collect(Collectors.toList());
+        List<Challenge> participatingChallenges = challengeRepository.findAllById(participatingChallengeIds);
 
-        // Fetch and map joinable challenges
-        List<ChallengeDTO> joinableChallenges = challengeRepository.findAll()
-                .stream()
+        // Fetch joinable challenges
+        List<Challenge> allChallenges = challengeRepository.findAll();
+        List<Challenge> joinableChallenges = allChallenges.stream()
                 .filter(challenge -> !participatingChallengeIds.contains(challenge.getId()))
-                .map(challengeMapper::challengeToDTO)
                 .collect(Collectors.toList());
 
-        Map<String, List<ChallengeDTO>> response = new HashMap<>();
+        // Prepare response
+        Map<String, List<Challenge>> response = new HashMap<>();
         response.put("participating", participatingChallenges);
         response.put("joinable", joinableChallenges);
 
         return ResponseEntity.ok(response);
     }
 
+    // Récupérer un défi par ID
     @GetMapping("/{id}")
     public ResponseEntity<?> getChallengeById(@PathVariable Long id) {
-        return challengeRepository.findById(id)
-                .<ResponseEntity<?>>map(challenge -> ResponseEntity.ok(challengeMapper.challengeToDTO(challenge))) // Explicit ResponseEntity type
-                .orElseGet(() -> ResponseEntity.badRequest().body("Challenge not found"));
+        Optional<Challenge> challengeOpt = challengeRepository.findById(id);
+
+        if (challengeOpt.isEmpty()) {
+            return ResponseEntity.badRequest().body("Challenge not found");
+        }
+
+        return ResponseEntity.ok(challengeOpt.get());
     }
 
-
+    // Modifier un défi
     @PutMapping("/edit/{id}")
     public ResponseEntity<?> editChallenge(@PathVariable Long id, @RequestBody Challenge updatedChallenge) {
-        return challengeRepository.findById(id)
-                .<ResponseEntity<?>>map(existingChallenge -> {
-                    // Update fields
-                    existingChallenge.setTitle(updatedChallenge.getTitle());
-                    existingChallenge.setExercise(updatedChallenge.getExercise());
-                    existingChallenge.setBeginingDate(updatedChallenge.getBeginingDate());
-                    existingChallenge.setEndingDate(updatedChallenge.getEndingDate());
+        Optional<Challenge> challengeOpt = challengeRepository.findById(id);
 
-                    ChallengeDTO updatedChallengeDTO = challengeMapper.challengeToDTO(challengeRepository.save(existingChallenge));
-                    return ResponseEntity.ok(updatedChallengeDTO);
-                })
-                .orElseGet(() -> ResponseEntity.badRequest().body("Challenge not found"));
+        if (challengeOpt.isEmpty()) {
+            return ResponseEntity.badRequest().body("Challenge not found");
+        }
+
+        Challenge existingChallenge = challengeOpt.get();
+        existingChallenge.setTitle(updatedChallenge.getTitle());
+        existingChallenge.setExercise(updatedChallenge.getExercise());
+        existingChallenge.setBeginingDate(updatedChallenge.getBeginingDate());
+        existingChallenge.setEndingDate(updatedChallenge.getEndingDate());
+
+        Challenge savedChallenge = challengeRepository.save(existingChallenge);
+        return ResponseEntity.ok(savedChallenge);
     }
 
+    // Supprimer un défi
+    @DeleteMapping("/delete/{id}")
+    public ResponseEntity<?> deleteChallenge(@PathVariable Long id) {
+        Optional<Challenge> challengeOpt = challengeRepository.findById(id);
+
+        if (challengeOpt.isEmpty()) {
+            return ResponseEntity.badRequest().body("Challenge not found");
+        }
+
+        challengeRepository.deleteById(id);
+        return ResponseEntity.ok("Challenge deleted successfully");
+    }
 
     @PostMapping("/join")
     public ResponseEntity<?> joinChallenge(@RequestBody UserChallenge userChallenge) {
+
         if (userChallenge.getUserId() == null || userChallenge.getChallengeId() == null) {
             return ResponseEntity.badRequest().body("User ID and Challenge ID are required");
         }
+        userChallenge.setUserScore(0L);
+        UserChallenge savedUserChallenge = userChallengeRepository.save(userChallenge);
+        return ResponseEntity.ok(savedUserChallenge);
+    }
 
-        // Validate challenge and user existence
-        if (!challengeRepository.existsById(userChallenge.getChallengeId()) || !userRepository.existsById(userChallenge.getUserId())) {
-            return ResponseEntity.badRequest().body("Invalid Challenge ID or User ID");
+
+    @GetMapping("/leaderBoard/{challengeId}")
+    public ResponseEntity<List<Map<String, Object>>> getLeaderBoard(@PathVariable Long challengeId) {
+        // Fetch users participating in the challenge
+        List<UserChallenge> participatingUsers = userChallengeRepository.findByChallengeId(challengeId);
+
+        if (participatingUsers.isEmpty()) {
+            return ResponseEntity.ok(new ArrayList<>()); // Return an empty list if no participants
         }
 
-        userChallenge.setUserScore(0L);
-        UserChallengeDTO savedUserChallenge = userChallengeMapper.userChallengeToDTO(userChallengeRepository.save(userChallenge));
-        return ResponseEntity.ok(savedUserChallenge);
+        // Map each user to their score
+        List<Map<String, Object>> leaderboard = participatingUsers.stream().map(userChallenge -> {
+                    Optional<User> user = userRepository.findById(userChallenge.getUserId());
+
+                    if (user.isPresent()) {
+                        Map<String, Object> entry = new HashMap<>();
+                        entry.put("name", user.get().getFirstName() + " " + user.get().getLastName());
+                        entry.put("score", userChallenge.getUserScore()); // Add user score
+                        return entry;
+                    }
+
+                    return null; // Handle cases where the user might not exist (shouldn't happen normally)
+                }).filter(Objects::nonNull) // Remove null entries
+                .sorted((a, b) -> Long.compare((Long) b.get("score"), (Long) a.get("score"))) // Sort by score descending
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok(leaderboard);
     }
 
     @PostMapping("/quit")
     public ResponseEntity<?> quitChallenge(@RequestBody UserChallenge userChallenge) {
+
         if (userChallenge.getUserId() == null || userChallenge.getChallengeId() == null) {
             return ResponseEntity.badRequest().body("User ID and Challenge ID are required");
         }
 
-        Optional<UserChallenge> existingUserChallenge = userChallengeRepository.findByUserIdAndChallengeId(
-                userChallenge.getUserId(),
-                userChallenge.getChallengeId()
-        );
+        userChallengeRepository.delete(userChallenge);
+        return ResponseEntity.ok(userChallenge);}
 
-        if (existingUserChallenge.isEmpty()) {
-            return ResponseEntity.badRequest().body("User is not part of this challenge");
-        }
-
-        userChallengeRepository.delete(existingUserChallenge.get());
-        return ResponseEntity.ok("Successfully left the challenge");
-    }
 }
