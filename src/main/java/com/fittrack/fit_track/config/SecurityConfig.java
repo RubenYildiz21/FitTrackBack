@@ -18,7 +18,6 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import com.fittrack.fit_track.security.JwtTokenFilter;
@@ -106,13 +105,5 @@ public class SecurityConfig implements WebMvcConfigurer {
         // Appliquer la configuration à tous les endpoints
         source.registerCorsConfiguration("/**", configuration);
         return source;
-    }
-
-
-    @Override
-    public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        // Mapping URL "/uploads/" vers le dossier physique "C:/uploads"
-        registry.addResourceHandler("/uploads/")
-                .addResourceLocations("file:C:/uploads/");
     }
 }
