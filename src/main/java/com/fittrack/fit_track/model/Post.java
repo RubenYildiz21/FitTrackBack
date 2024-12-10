@@ -5,13 +5,18 @@ import java.util.Date;
 import java.util.List;
 
 import jakarta.persistence.*;
+import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
+@Data
 @Entity
 public class Post {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long idPost;
-    
+
+    // Setter pour contenu
     private String contenu;
     
     @Temporal(TemporalType.TIMESTAMP)
@@ -19,6 +24,7 @@ public class Post {
 
     private String imageUrl;
 
+    // Getters et setters
     private int nombreLikes = 0;
 
 
@@ -31,47 +37,20 @@ public class Post {
     private List<Commentaire> commentaires;
 
 
-
-    // Getters et setters 
-    public int getNombreLikes() {
-        return nombreLikes;
-    }
-
-    public void setNombreLikes(int nombreLikes) {
-        this.nombreLikes = nombreLikes;
-    }
-
-    public List<Commentaire> getCommentaires() {
-        return commentaires;
-    }
-
-    public void setCommentaires(List<Commentaire> commentaires) {
-        this.commentaires = commentaires;
-    }
-
-    public String getImageUrl() {
-        return imageUrl;
-    }
-
-    public void setImageUrl(String imageUrl) {
-        this.imageUrl = imageUrl;
-    }
-
-    public String getContenu() {
-        return contenu;
-    }
-
-    // Setter pour contenu
-    public void setContenu(String contenu) {
-        this.contenu = contenu;
-    }
-
     public Long getIdPost() {
         return idPost;
     }
 
     public void setIdPost(Long idPost) {
         this.idPost = idPost;
+    }
+
+    public String getContenu() {
+        return contenu;
+    }
+
+    public void setContenu(String contenu) {
+        this.contenu = contenu;
     }
 
     public Date getDateCreation() {
@@ -82,6 +61,21 @@ public class Post {
         this.dateCreation = dateCreation;
     }
 
+    public String getImageUrl() {
+        return imageUrl;
+    }
+
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
+    }
+
+    public int getNombreLikes() {
+        return nombreLikes;
+    }
+
+    public void setNombreLikes(int nombreLikes) {
+        this.nombreLikes = nombreLikes;
+    }
 
     public User getUser() {
         return user;
@@ -90,4 +84,14 @@ public class Post {
     public void setUser(User user) {
         this.user = user;
     }
+
+    public List<Commentaire> getCommentaires() {
+        return commentaires;
+    }
+
+    public void setCommentaires(List<Commentaire> commentaires) {
+        this.commentaires = commentaires;
+    }
+
+
 }

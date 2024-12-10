@@ -1,6 +1,7 @@
 package com.fittrack.fit_track.controller;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,7 +31,6 @@ import com.fittrack.fit_track.dto.UserDTO;
 import com.fittrack.fit_track.mapper.UserMapper;
 import com.fittrack.fit_track.model.User;
 import com.fittrack.fit_track.repository.UserRepository;
-import com.fittrack.fit_track.service.CloudinaryService;
 import com.fittrack.fit_track.utils.JwtUtils;
 
 import jakarta.validation.Valid;
@@ -52,11 +52,9 @@ public class AuthController {
     private JwtUtils jwtUtils;
 
     @Autowired
-    private CloudinaryService cloudinaryService;
+    private UserMapper userMapper; 
 
-    @Autowired
-    private UserMapper userMapper;
-
+    
     @PostMapping("/login")
     public ResponseEntity<?> login(@Valid @RequestBody LoginRequest loginRequest, BindingResult bindingResult) {
         System.out.println("Login attempt for email: " + loginRequest.getEmail());
@@ -123,48 +121,42 @@ public class AuthController {
             return ResponseEntity.badRequest().body("Email already in use");
         }
 
-        try {
+        // Créer un nouvel utilisateur
+        User user = new User();
+        user.setFirstName(firstName);
+        user.setLastName(lastName);
+        user.setEmail(email);
+        user.setPassword(passwordEncoder.encode(password));
+        user.setAge(age);
+        user.setTrainingLevel(trainingLevel);
+        user.setGender(gender);
+        user.setMainGoal(mainGoal);
+        user.setGoalWeight(goalWeight);
+        user.setHeight(height);
+        user.setWeight(weight);
+        user.setPlace(place);
 
-            String profilePictureUrl = null;
+        user.setRoles(Set.of("USER"));
 
-            if(profilePicture != null && !profilePicture.isEmpty()) {
-                profilePictureUrl = cloudinaryService.uploadImage(profilePicture);
-                System.out.println("Image uploaded to Cloudinary: " + profilePictureUrl);
+        // Enregistrer l'image en tant que tableau de bytes
+        if (profilePicture != null && !profilePicture.isEmpty()) {
+            try {
+                user.setProfilePicture(Arrays.toString(profilePicture.getBytes()));
+            } catch (IOException e) {
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error saving profile picture");
             }
-            // Créer un nouvel utilisateur
-            User user = new User();
-            user.setFirstName(firstName);
-            user.setLastName(lastName);
-            user.setEmail(email);
-            user.setPassword(passwordEncoder.encode(password));
-            user.setAge(age);
-            user.setTrainingLevel(trainingLevel);
-            user.setGender(gender);
-            user.setMainGoal(mainGoal);
-            user.setGoalWeight(goalWeight);
-            user.setHeight(height);
-            user.setWeight(weight);
-            user.setPlace(place);
-            user.setProfilePicture(profilePictureUrl);
-
-            user.setRoles(Set.of("USER"));
-
-            // Sauvegarder l'utilisateur après validation des informations
-            User savedUser = userRepository.save(user);
-
-            UserDTO userDTO = userMapper.userToUserDTO(savedUser);
-
-            // Préparer la réponse avec DTO
-            RegisterResponseDTO registerResponse = new RegisterResponseDTO();
-            registerResponse.setUser(userDTO);
-
-            return ResponseEntity.ok(registerResponse);
-        } catch (IOException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("Error uploading file: " + e.getMessage());
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred: " + e.getMessage());
         }
+
+        // Sauvegarder l'utilisateur après validation des informations
+        User savedUser = userRepository.save(user);
+
+        UserDTO userDTO = userMapper.userToUserDTO(savedUser);
+
+        // Préparer la réponse avec DTO
+        RegisterResponseDTO registerResponse = new RegisterResponseDTO();
+        registerResponse.setUser(userDTO);
+
+        return ResponseEntity.ok(registerResponse);
     }
 
     // Optionnel: Logout Endpoint

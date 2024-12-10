@@ -14,6 +14,10 @@ import jakarta.persistence.NamedAttributeNode;
 import jakarta.persistence.NamedEntityGraph;
 import jakarta.persistence.NamedSubgraph;
 import jakarta.persistence.OneToMany;
+import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
+
 
 @Entity
 @NamedEntityGraph(
@@ -21,11 +25,12 @@ import jakarta.persistence.OneToMany;
     attributeNodes = @NamedAttributeNode(value = "blocs", subgraph = "blocsSeries"),
     subgraphs = @NamedSubgraph(name = "blocsSeries", attributeNodes = @NamedAttributeNode("series"))
 )
+@Data
 public class Seance {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long idSeance;
-    
+
     private LocalDateTime dateSeance;
 
     private String nameSeance;

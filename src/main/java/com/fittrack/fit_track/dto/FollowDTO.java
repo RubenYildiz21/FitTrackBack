@@ -15,4 +15,28 @@ public class FollowDTO {
     private Long followerId;
 
     private Long followId;
+
+    public Long getIdConnection() {
+        return idConnection;
+    }
+
+    public void setIdConnection(Long idConnection) {
+        this.idConnection = idConnection;
+    }
+
+    public Long getFollowerId() {
+        return followerId;
+    }
+
+    public void setFollowerId(Long followerId) {
+        this.followerId = followerId;
+    }
+
+    public Long getFollowId() {
+        return followId;
+    }
+
+    public void setFollowId(Long followId) {
+        this.followId = followId;
+    }
 }
