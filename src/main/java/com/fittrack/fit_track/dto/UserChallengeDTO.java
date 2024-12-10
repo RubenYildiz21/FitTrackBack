@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class UserChallengeDTO {
-    private long challenge_id;
-    private long user_id;
-    private long user_score;
+    private Long challenge_id;
+    private Long user_id;
+    private Long user_score;
 }

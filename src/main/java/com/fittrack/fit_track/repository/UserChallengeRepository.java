@@ -6,8 +6,9 @@ import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import com.fittrack.fit_track.model.UserChallenge;
+import com.fittrack.fit_track.model.UserChallengePK;
 
-public interface UserChallengeRepository extends JpaRepository<UserChallenge, Long> {
+public interface UserChallengeRepository extends JpaRepository<UserChallenge, UserChallengePK> {
     List<UserChallenge> findByUserId(Long userId);
 
     List<UserChallenge> findByChallengeId(Long challengeId);

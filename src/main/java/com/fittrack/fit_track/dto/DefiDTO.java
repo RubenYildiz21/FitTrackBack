@@ -3,7 +3,9 @@ package com.fittrack.fit_track.dto;
 
 import java.util.List;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 
 @Data

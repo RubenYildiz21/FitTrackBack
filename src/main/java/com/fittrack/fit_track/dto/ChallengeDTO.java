@@ -1,9 +1,6 @@
-// src/main/java/com/fittrack/fit_track/dto/UserDTO.java
 package com.fittrack.fit_track.dto;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.Set;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
