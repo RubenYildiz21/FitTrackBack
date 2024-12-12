@@ -10,9 +10,14 @@ public class Notification {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private Long from;
-    private Long to;
+    @Column(name = "content")
     private String content;
+
+    @Column(name = "`from`")
+    private Long from;
+
+    @Column(name = "`to`")
+    private Long to;
 
 
     // Getters and Setters

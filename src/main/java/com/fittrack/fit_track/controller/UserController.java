@@ -67,6 +67,7 @@ public class UserController {
         user.setLastName(userDetailsDTO.getLastName());
         user.setHeight(userDetailsDTO.getHeight());
         user.setWeight(userDetailsDTO.getWeight());
+        user.setAlllowsNotifications(userDetailsDTO.isAlllowsNotifications());
 
         User updatedUser = userRepository.save(user);
         UserDTO updatedUserDTO = userMapper.userToUserDTO(updatedUser);

@@ -18,8 +18,6 @@ import jakarta.persistence.OneToMany;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
 
 @Data
 @Entity
@@ -45,6 +43,8 @@ public class User {
     @NotBlank(message = "Password is required")
     @JsonIgnore
     private String password;
+
+    private boolean alllowsNotifications;
 
 
     private int age;
