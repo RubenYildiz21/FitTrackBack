@@ -86,23 +86,22 @@ public class SecurityConfig implements WebMvcConfigurer {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         
-        // Autoriser toutes les origines
-        configuration.setAllowedOriginPatterns(Arrays.asList("https://fit-track-front.vercel.app/", "https://fit-track-latest-ns4a.onrender.com"));
+        // Autoriser l'origine de Vercel
+        configuration.setAllowedOrigins(Arrays.asList("https://fit-track-front.vercel.app"));
         
-        // Autoriser toutes les méthodes HTTP
+        // Autoriser les méthodes HTTP nécessaires
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         
-        // Autoriser tous les en-têtes
+        // Autoriser tous les headers
         configuration.setAllowedHeaders(Arrays.asList("*"));
         
-        // Autoriser les informations d'identification (cookies, headers d'autorisation)
+        // Autoriser les credentials
         configuration.setAllowCredentials(true);
         
-        // Exposer certains headers si nécessaire
-        configuration.setExposedHeaders(Arrays.asList("Authorization", "Content-Type"));
+        // Exposer les headers nécessaires
+        configuration.setExposedHeaders(Arrays.asList("Authorization"));
         
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        // Appliquer la configuration à tous les endpoints
         source.registerCorsConfiguration("/**", configuration);
         return source;
     }
