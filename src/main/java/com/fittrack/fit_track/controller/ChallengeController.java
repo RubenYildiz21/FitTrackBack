@@ -1,19 +1,20 @@
 package com.fittrack.fit_track.controller;
 
 import com.fittrack.fit_track.dto.ChallengeDTO;
+import com.fittrack.fit_track.dto.NotificationDTO;
 import com.fittrack.fit_track.dto.UserChallengeDTO;
 import com.fittrack.fit_track.dto.UserDTO;
 import com.fittrack.fit_track.mapper.ChallengeMapper;
+import com.fittrack.fit_track.mapper.NotificationMapper;
 import com.fittrack.fit_track.mapper.UserChallengeMapper;
 import com.fittrack.fit_track.mapper.UserMapper;
 import com.fittrack.fit_track.model.Challenge;
 import com.fittrack.fit_track.model.User;
 import com.fittrack.fit_track.model.UserChallenge;
-import com.fittrack.fit_track.repository.ChallengeRepository;
-import com.fittrack.fit_track.repository.UserChallengeRepository;
-import com.fittrack.fit_track.repository.UserRepository;
+import com.fittrack.fit_track.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
@@ -27,7 +28,13 @@ public class ChallengeController {
     private ChallengeRepository challengeRepository;
 
     @Autowired
+    private NotificationMapper notificationMapper;
+
+    @Autowired
     private ChallengeMapper challengeMapper;
+
+    @Autowired
+    private FollowRepository followRepository;
 
     @Autowired
     private UserMapper userMapper;
@@ -39,6 +46,8 @@ public class ChallengeController {
     private UserChallengeRepository userChallengeRepository;
     @Autowired
     private UserRepository userRepository;
+    @Autowired
+    private NotificationRepository notificationRepository;
 
     @PostMapping("/create")
     public ResponseEntity<?> createChallenge(@RequestBody Challenge challenge) {
@@ -61,6 +70,20 @@ public class ChallengeController {
         response.put("challenge", savedChallenge);
         response.put("userChallenge", savedUserChallenge);
 
+        List<Long> followers = followRepository.findByFollow(userRepository.findById(savedChallenge.getId_user()).get()).stream()
+                .map(follow -> follow.getFollower().getId())
+                .collect(Collectors.toList());
+
+        followers.forEach(followerId -> {
+            NotificationDTO notification = new NotificationDTO();
+            notification.setFrom(savedChallenge.getId_user());
+            notification.setTo(followerId);
+            notification.setContent("a créé un nouveau challenge : " + savedChallenge.getTitle());
+
+            notificationRepository.save(notificationMapper.notificationDTOToNotification(notification));
+
+        });
+    
         return ResponseEntity.ok(response);
     }
 
@@ -140,11 +163,6 @@ public class ChallengeController {
         existingChallenge.setBeginDate(updatedChallenge.getBeginingDate());
         existingChallenge.setEndDate(updatedChallenge.getEndingDate());
 
-        /*Challenge existingChallenge = challengeOpt.get();
-        existingChallenge.setTitle(updatedChallenge.getTitle());
-        existingChallenge.setExercise(updatedChallenge.getExercise());
-        existingChallenge.setBeginingDate(updatedChallenge.getBeginingDate());
-        existingChallenge.setEndingDate(updatedChallenge.getEndingDate()); */
 
         ChallengeDTO savedChallenge = challengeMapper.challengeToDTO(challengeRepository.save(challengeMapper.challengeDTOToChallenge(existingChallenge)));
         //Challenge savedChallenge = challengeRepository.save(existingChallenge);
@@ -167,6 +185,7 @@ public class ChallengeController {
     }
 
     @PostMapping("/join")
+    @Transactional
     public ResponseEntity<?> joinChallenge(@RequestBody UserChallenge userChallenge) {
         UserChallengeDTO userChallengeDTO = userChallengeMapper.userChallengeToDTO(userChallenge);
 
@@ -175,6 +194,22 @@ public class ChallengeController {
         }
         userChallengeDTO.setUser_score(0L);
         UserChallengeDTO savedUserChallenge = userChallengeMapper.userChallengeToDTO(userChallengeRepository.save(userChallengeMapper.userChallengeDTOToUserChallenge(userChallengeDTO)));
+
+        List<Long> followers = followRepository.findByFollow(userRepository.findById(userChallengeDTO.getUser_id()).get()).stream()
+                .map(follow -> follow.getFollower().getId())
+                .collect(Collectors.toList());
+
+        ChallengeDTO challengeDto = challengeMapper.challengeToDTO(challengeRepository.getReferenceById(userChallengeDTO.getChallenge_id()));
+
+        followers.forEach(followerId -> {
+            NotificationDTO notification = new NotificationDTO();
+            notification.setFrom(userChallengeDTO.getUser_id());
+            notification.setTo(followerId);
+            notification.setContent("a rejoint le challenge : " + challengeDto.getTitle());
+
+            notificationRepository.save(notificationMapper.notificationDTOToNotification(notification));
+
+        });
         return ResponseEntity.ok(savedUserChallenge);
     }
 

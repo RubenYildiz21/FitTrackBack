@@ -39,4 +39,6 @@ public class UserDTO {
     private String profilePicture;
 
     private Set<String> roles;
+
+    private boolean alllowsNotifications;
 }

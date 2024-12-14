@@ -135,6 +135,7 @@ public class AuthController {
         user.setHeight(height);
         user.setWeight(weight);
         user.setPlace(place);
+        user.setAlllowsNotifications(true);
 
         user.setRoles(Set.of("USER"));
 
