@@ -6,7 +6,14 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
+import com.fittrack.fit_track.dto.ChallengeDTO;
+import com.fittrack.fit_track.dto.NotificationDTO;
+import com.fittrack.fit_track.mapper.NotificationMapper;
+import com.fittrack.fit_track.repository.FollowRepository;
+import com.fittrack.fit_track.repository.NotificationRepository;
+import com.fittrack.fit_track.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -39,6 +46,13 @@ public class PostController {
 
     @Autowired
     private CloudinaryService cloudinaryService;
+
+
+    @Autowired
+    private NotificationRepository notificationRepository;
+
+    @Autowired
+    private NotificationMapper notificationMapper;
 
     @GetMapping
     @PreAuthorize("isAuthenticated()")
@@ -102,6 +116,14 @@ public class PostController {
     public ResponseEntity<PostDTO> likePost(@PathVariable Long id, @RequestParam Long userId) {
         try {
             PostDTO updatedPost = postService.likePost(id, userId);
+
+                NotificationDTO notification = new NotificationDTO();
+                notification.setFrom(userId);
+                notification.setTo(postService.getPostById(id).getUserId());
+                notification.setContent("a liké votre post");
+
+                notificationRepository.save(notificationMapper.notificationDTOToNotification(notification));
+
             return ResponseEntity.ok(updatedPost);
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().build();
